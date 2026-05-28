@@ -1,0 +1,1220 @@
+{
+  "quiz_id": "rails_tutorial_engineering_en_01",
+  "title": "Ruby on Rails Tutorial - Software Engineering Quiz",
+  "description": "A 40-question English quiz based on this Rails Tutorial hello_app codebase. The questions focus on practical Rails reasoning, tricky project-specific behavior, debugging, security, testing, deployment, and application design.",
+  "time_limit": 3600,
+  "passing_score": 70,
+  "difficulty": "Intermediate",
+  "tags": [
+    "Ruby on Rails",
+    "Rails Tutorial",
+    "MVC",
+    "Active Record",
+    "Authentication",
+    "Authorization",
+    "Testing",
+    "Deployment"
+  ],
+  "grading": {
+    "score_type": "points",
+    "allow_partial_score": false,
+    "multiple_choice_scoring": {
+      "mode": "exact_match"
+    },
+    "case_study_scoring": {
+      "score_by_sub_questions": true
+    }
+  },
+  "ui_config": {
+    "show_progress_bar": true,
+    "show_timer": true,
+    "show_question_number": true,
+    "show_explanation_after_submit": true,
+    "allow_review_before_submit": true,
+    "allow_back_navigation": true
+  },
+  "result_messages": [
+    {
+      "min_score": 0,
+      "max_score": 49,
+      "message": "Review the Rails request cycle, Active Record associations, authentication, authorization, and test coverage before moving on."
+    },
+    {
+      "min_score": 50,
+      "max_score": 69,
+      "message": "You understand the basics, but the tricky Rails security and debugging details need more practice."
+    },
+    {
+      "min_score": 70,
+      "max_score": 89,
+      "message": "Good Rails Tutorial engineering readiness. Keep practicing production debugging and design tradeoffs."
+    },
+    {
+      "min_score": 90,
+      "max_score": 100,
+      "message": "Excellent. You can reason about this Rails app like a careful junior software engineer."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q001",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Rails Fundamentals and MVC",
+      "title": "GET /users/1 Request Flow",
+      "question": "A browser sends `GET /users/1` in this app. Which explanation best matches the Rails request lifecycle?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "The router matches `resources :users`, dispatches to `UsersController#show`, the controller loads the user and microposts, and the view renders `users/show.html.slim`."
+        },
+        {
+          "id": "b",
+          "text": "The `User` model receives the HTTP request, loads its own profile template, and calls the controller only if validation fails."
+        },
+        {
+          "id": "c",
+          "text": "The Slim view receives the request first, then asks `routes.rb` which controller should run."
+        },
+        {
+          "id": "d",
+          "text": "Rails bypasses the router for RESTful `show` actions because the URL already contains the user id."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing MVC responsibilities: routes dispatch, controllers coordinate, models query data, and views render. A common mistake is putting request handling or database lookup logic in the view instead of keeping it in the controller/model boundary."
+    },
+    {
+      "id": "q002",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Rails Fundamentals and MVC",
+      "title": "Code Reading: Member Routes",
+      "question": "Read this route snippet: `resources :users do\\n  member do\\n    get :following, :followers\\n  end\\nend`. What is the most precise interpretation?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "It creates user-specific routes such as `/users/:id/following`, handled by `UsersController#following`."
+        },
+        {
+          "id": "b",
+          "text": "It creates global routes such as `/users/following`, handled by `RelationshipsController#following`."
+        },
+        {
+          "id": "c",
+          "text": "It replaces the normal RESTful `show` route with following and followers pages."
+        },
+        {
+          "id": "d",
+          "text": "It creates POST routes because following and followers are relationship-changing actions."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing `member` routes with `collection` routes and confusing read-only follow pages with relationship-changing actions. The member route includes `:id`, maps to `UsersController`, and is tested through paths like `following_user_path(@user)`."
+    },
+    {
+      "id": "q003",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Rails Fundamentals and MVC",
+      "title": "Where Login-Dependent Home Data Comes From",
+      "question": "On the home page, logged-in users see a micropost form and feed, while visitors see the landing content. Which file is primarily responsible for preparing `@micropost` and `@feed_items`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`app/controllers/static_pages_controller.rb`, because `home` prepares instance variables before rendering the view."
+        },
+        {
+          "id": "b",
+          "text": "`app/views/static_pages/home.html.slim`, because views should build model objects when form fields need them."
+        },
+        {
+          "id": "c",
+          "text": "`config/routes.rb`, because route helpers decide whether a visitor is logged in."
+        },
+        {
+          "id": "d",
+          "text": "`app/models/micropost.rb`, because models decide which page layout should be shown."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is moving controller setup into the view. `StaticPagesController#home` checks `logged_in?`, builds the form object, and loads the feed; the view should render based on prepared state, not own the request workflow."
+    },
+    {
+      "id": "q004",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Authorization and Security",
+      "title": "Code Reading: Two User Edit Callbacks",
+      "question": "Read this controller pattern: `before_action :logged_in_user, only: [:edit, :update]\\nbefore_action :correct_user, only: [:edit, :update]`. Why are both callbacks needed?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`logged_in_user` checks authentication, while `correct_user` checks whether the logged-in user owns the profile being edited."
+        },
+        {
+          "id": "b",
+          "text": "`logged_in_user` checks admin permission, while `correct_user` checks whether the password is valid."
+        },
+        {
+          "id": "c",
+          "text": "Both callbacks perform the same check, but two callbacks prevent session expiration."
+        },
+        {
+          "id": "d",
+          "text": "Rails requires edit and update actions to have at least two callbacks when using RESTful routes."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing authentication with authorization. A logged-in user is not automatically allowed to edit every user record; without `correct_user`, one user could change another user's profile by editing the URL id. This should be covered by wrong-user edit/update tests."
+    },
+    {
+      "id": "q005",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Rails Fundamentals and MVC",
+      "title": "View Helpers Versus Raw URLs",
+      "question": "The layout uses helpers such as `root_path`, `login_path`, and `edit_user_path(current_user)`. Why is this better than hard-coding strings like `/login` everywhere?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Route helpers keep links tied to `routes.rb`, so route changes are easier to maintain and tests can assert intended paths."
+        },
+        {
+          "id": "b",
+          "text": "Route helpers bypass controller actions and render views directly, reducing request overhead."
+        },
+        {
+          "id": "c",
+          "text": "Route helpers automatically authorize the current user before generating a link."
+        },
+        {
+          "id": "d",
+          "text": "Route helpers convert all GET links into POST requests when Turbolinks is enabled."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is assuming helpers provide security or skip MVC. Helpers only generate URLs from route definitions; backend authorization still belongs in controllers. This prevents brittle hard-coded paths and supports layout link tests with `assert_select`."
+    },
+    {
+      "id": "q006",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Ruby and Rails Syntax",
+      "title": "Code Reading: Symbols in strong parameters",
+      "question": "Read this code: `params.require(:user).permit(:name, :email, :password, :password_confirmation)`. What is the role of symbols such as `:email` here?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "They name permitted parameter keys in a Rails DSL, acting as lightweight immutable identifiers."
+        },
+        {
+          "id": "b",
+          "text": "They encrypt submitted values before the controller sees them."
+        },
+        {
+          "id": "c",
+          "text": "They force Rails to create missing database columns during the request."
+        },
+        {
+          "id": "d",
+          "text": "They mark fields that should be ignored by mass assignment."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing Ruby syntax with security behavior. Symbols are identifiers used by Rails APIs; the whitelist behavior comes from `permit`, not from symbols themselves. This helps avoid mistakes such as permitting `:admin` just because it is written as a symbol."
+    },
+    {
+      "id": "q007",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Ruby and Rails Syntax",
+      "title": "Code Reading: Memoizing current_user",
+      "question": "In `SessionsHelper#current_user`, why does the code use `@current_user ||= User.find_by(id: user_id)` when `session[:user_id]` exists?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "It caches the database lookup for the current request while still returning nil safely if the id is invalid."
+        },
+        {
+          "id": "b",
+          "text": "It stores the user permanently in the browser cookie so the session survives a browser restart."
+        },
+        {
+          "id": "c",
+          "text": "It reloads the user from the database on every helper call to avoid stale data."
+        },
+        {
+          "id": "d",
+          "text": "It creates a new user automatically if the session id does not match any row."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing request-level memoization with persistent login. `||=` avoids repeated queries during one request; remember-me persistence is handled separately through encrypted cookies and `remember_token`."
+    },
+    {
+      "id": "q008",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Ruby and Rails Syntax",
+      "title": "Code Reading: Dynamic Digest Authentication",
+      "question": "The `User#authenticated?(attribute, token)` method calls `send(\"#{attribute}_digest\")`. What does this design allow?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "One method can verify different digest columns such as `remember_digest`, `activation_digest`, and `reset_digest`."
+        },
+        {
+          "id": "b",
+          "text": "One method can recover the original token from any digest column."
+        },
+        {
+          "id": "c",
+          "text": "One method can skip BCrypt when the token came from an email link."
+        },
+        {
+          "id": "d",
+          "text": "One method can update any digest column without needing validations."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is thinking a digest can be reversed or treated as the original token. `send` dynamically reads the selected digest column, and BCrypt verifies the supplied token one-way. The nil-digest guard prevents stale cookies or missing reset digests from causing errors."
+    },
+    {
+      "id": "q009",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Ruby and Rails Syntax",
+      "title": "Blocks in Validation Tests",
+      "question": "A model test loops over valid email examples with `valid_addresses.each do |valid_address| ... end`. What software engineering value does that block provide?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "It checks several representative inputs with one test structure while still allowing each failing address to be reported."
+        },
+        {
+          "id": "b",
+          "text": "It makes Rails skip uniqueness validation for each address during the loop."
+        },
+        {
+          "id": "c",
+          "text": "It opens a database transaction for each address and commits only the final one."
+        },
+        {
+          "id": "d",
+          "text": "It converts the array of addresses into route helpers for integration tests."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is treating Ruby blocks as Rails magic. The block is just a Ruby iteration idiom that makes the test concise and expressive; validations still run normally for each sample."
+    },
+    {
+      "id": "q010",
+      "type": "single_choice",
+      "level": "Foundation",
+      "category": "Model, Database, and Validation",
+      "title": "Active Record Association Direction",
+      "question": "In the project, `Micropost` has `belongs_to :user` and `User` has `has_many :microposts`. Which statement is most accurate?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`microposts.user_id` stores ownership, so a micropost belongs to exactly one user while a user can own many microposts."
+        },
+        {
+          "id": "b",
+          "text": "`users.micropost_id` stores ownership, so each user belongs to one micropost."
+        },
+        {
+          "id": "c",
+          "text": "The association is only for view rendering; it does not affect how records are queried."
+        },
+        {
+          "id": "d",
+          "text": "`dependent: :destroy` belongs on `Micropost` because the child should delete its parent user."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is reversing `belongs_to` and `has_many`. The foreign key is on `microposts`, and `dependent: :destroy` belongs on the parent `User` association so deleting a user cleans up child posts, not the other way around."
+    },
+    {
+      "id": "q011",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Model, Database, and Validation",
+      "title": "Email Uniqueness Under Real Traffic",
+      "question": "The `User` model validates email uniqueness. What is still needed to make duplicate emails reliable under concurrent signup requests?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "A unique database index on the normalized email column, plus model validation for user-friendly errors."
+        },
+        {
+          "id": "b",
+          "text": "Only a JavaScript check on the signup form, because users cannot submit duplicate emails accidentally."
+        },
+        {
+          "id": "c",
+          "text": "Only `validates :email, uniqueness: true`, because Rails validations run inside the database engine."
+        },
+        {
+          "id": "d",
+          "text": "A hidden form field containing the previous email count for the server to compare."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing model validations with database constraints. Rails validation improves UX but can lose a race; a DB unique index enforces the invariant. This project's schema is a good review target because email validation exists but the database index must also be checked."
+    },
+    {
+      "id": "q012",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Model, Database, and Validation",
+      "title": "Code Reading: Relationship Associations",
+      "question": "Read this association design: `has_many :active_relationships, class_name: 'Relationship', foreign_key: 'follower_id'` and `has_many :following, through: :active_relationships, source: :followed`. What does it model?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Users this user follows, through rows where this user's id is stored as `follower_id`."
+        },
+        {
+          "id": "b",
+          "text": "Users who follow this user, through rows where this user's id is stored as `followed_id`."
+        },
+        {
+          "id": "c",
+          "text": "Microposts written by followed users, through the `microposts.user_id` index."
+        },
+        {
+          "id": "d",
+          "text": "A symmetric friendship relationship where either foreign key can mean follower or followed."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is reversing active and passive relationships. `active_relationships` are rows initiated by the current user; `following` uses `source: :followed` to return the target users. Followers are modeled separately through passive relationships."
+    },
+    {
+      "id": "q013",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Model, Database, and Validation",
+      "title": "Micropost Creation Through current_user",
+      "question": "Why should `MicropostsController#create` use `current_user.microposts.build(micropost_params)` instead of trusting a submitted `user_id` parameter?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "The server must derive ownership from the authenticated user, not from user-controlled params."
+        },
+        {
+          "id": "b",
+          "text": "Rails cannot save a micropost unless `user_id` is omitted from every request."
+        },
+        {
+          "id": "c",
+          "text": "The form helper automatically rejects all hidden fields named `user_id`."
+        },
+        {
+          "id": "d",
+          "text": "The database foreign key automatically changes any submitted `user_id` to `current_user.id`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is trusting client-submitted ownership. Attackers can modify hidden fields or raw requests; building through `current_user` makes the controller enforce ownership and should be covered by create/destroy authorization tests."
+    },
+    {
+      "id": "q014",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Code Reading: remember(user)",
+      "question": "Read this helper behavior: `user.remember`; `cookies.permanent.encrypted[:user_id] = user.id`; `cookies.permanent[:remember_token] = user.remember_token`. Why is the token stored in the cookie but only a digest is stored in the database?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "The cookie needs the raw bearer token for future requests, while the database stores only a digest to reduce damage if the database leaks."
+        },
+        {
+          "id": "b",
+          "text": "The database cannot store strings generated by `SecureRandom.urlsafe_base64`."
+        },
+        {
+          "id": "c",
+          "text": "Rails sessions automatically copy encrypted cookies into `remember_digest`."
+        },
+        {
+          "id": "d",
+          "text": "The raw token is safer in the database than in the browser because browsers cannot be inspected."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing `remember_token` with `remember_digest`. The raw token is a bearer secret sent by the browser; the database stores a one-way digest so a DB leak does not immediately reveal valid persistent-login tokens."
+    },
+    {
+      "id": "q015",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Authentication, Session, and Cookies",
+      "title": "flash.now for Invalid Login",
+      "question": "When login fails, `SessionsController#create` uses `flash.now[:danger]` and renders `sessions/new`. Why is that the right choice?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Because `render` stays in the same request, so `flash.now` prevents the error message from leaking into the next page."
+        },
+        {
+          "id": "b",
+          "text": "Because `flash.now` stores the message in the session so it survives a browser restart."
+        },
+        {
+          "id": "c",
+          "text": "Because normal `flash` only works from model validations, not from controller actions."
+        },
+        {
+          "id": "d",
+          "text": "Because `flash.now` automatically clears invalid cookies before rendering the login form."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing render with redirect. Normal `flash` is intended for the next request, while `flash.now` is for the current rendered response. The login tests correctly check that the message disappears after navigating away."
+    },
+    {
+      "id": "q016",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Account Activation Login Gate",
+      "question": "After a successful signup, this app sends an activation email and redirects to the root page. Why should `SessionsController#create` still check `user.activated?` during login?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Because a user row can exist before activation, and authentication with a password alone should not grant access."
+        },
+        {
+          "id": "b",
+          "text": "Because `has_secure_password` only works after the activation email is opened."
+        },
+        {
+          "id": "c",
+          "text": "Because activation changes the user's password digest to a stronger hash."
+        },
+        {
+          "id": "d",
+          "text": "Because inactive users are not stored in the database until they click the email link."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is assuming signup success equals access. The user is saved but inactive; login must combine password authentication with activation state. Tests should verify that inactive users cannot log in before using a valid activation link."
+    },
+    {
+      "id": "q017",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Authorization and Security",
+      "title": "Code Reading: Strong Parameters and admin",
+      "question": "Read this whitelist: `permit(:name, :email, :password, :password_confirmation)`. Why must `:admin` be excluded from normal user update parameters?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Otherwise a normal user could submit `admin=true` and mass-assign themselves elevated privileges."
+        },
+        {
+          "id": "b",
+          "text": "Otherwise Rails would stop rendering the edit form because booleans are not valid form fields."
+        },
+        {
+          "id": "c",
+          "text": "Otherwise the database default `admin: false` would override all submitted profile changes."
+        },
+        {
+          "id": "d",
+          "text": "Otherwise `has_secure_password` would require admin users to have longer passwords."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is trusting form fields. Attackers are not limited to visible inputs; they can craft requests. The project correctly has a test that attempts to submit `admin: true` and expects the user to remain non-admin."
+    },
+    {
+      "id": "q018",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Authorization and Security",
+      "title": "Admin Destroy Is Not a View-Only Rule",
+      "question": "The users index may hide delete links from non-admin users. What must still be true in `UsersController#destroy`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "The action must be protected by a server-side admin check because users can send DELETE requests without using the page UI."
+        },
+        {
+          "id": "b",
+          "text": "The action can trust the hidden delete link because Rails only accepts DELETE requests from rendered links."
+        },
+        {
+          "id": "c",
+          "text": "The action only needs a CSRF token because CSRF protection proves the user is an admin."
+        },
+        {
+          "id": "d",
+          "text": "The action should check whether the target user is activated, because inactive users cannot be deleted."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is confusing UI visibility with authorization. Hiding links improves UX but does not protect the endpoint. `admin_user` and tests for non-admin direct DELETE requests prevent privilege escalation."
+    },
+    {
+      "id": "q019",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Authorization and Security",
+      "title": "Micropost Destroy Ownership",
+      "question": "Why does `MicropostsController#correct_user` search with `current_user.microposts.find_by(id: params[:id])` instead of `Micropost.find(params[:id])`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "It scopes lookup to posts owned by the current user, so another user's micropost cannot be destroyed by changing the id."
+        },
+        {
+          "id": "b",
+          "text": "It makes the query faster because Rails does not need to use the database."
+        },
+        {
+          "id": "c",
+          "text": "It lets any logged-in user delete any post if the post appears in their feed."
+        },
+        {
+          "id": "d",
+          "text": "It is required because `Micropost.find` cannot load records with attached images."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is thinking a logged-in user may act on any resource id. Scoping through `current_user` enforces ownership and should be tested with a wrong-micropost destroy request that does not change `Micropost.count`."
+    },
+    {
+      "id": "q020",
+      "type": "single_choice",
+      "level": "Applied",
+      "category": "Testing and Debugging",
+      "title": "Choosing the Right Test Type",
+      "question": "You want to verify that invalid signup information does not create a user and re-renders the signup page with validation errors. Which test style fits best in this project?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "An integration test using `assert_no_difference 'User.count'`, `post users_path`, and `assert_template 'users/new'`."
+        },
+        {
+          "id": "b",
+          "text": "A model test only, because controller rendering is irrelevant to signup behavior."
+        },
+        {
+          "id": "c",
+          "text": "A mailer test only, because all signup flows send activation email."
+        },
+        {
+          "id": "d",
+          "text": "A fixture test only, because fixtures define whether users can be created."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The trap is picking too narrow a test layer. Invalid signup crosses routing, controller params, model validation, and view rendering, so an integration test gives the right behavioral coverage while model tests still cover validation details."
+    },
+    {
+      "id": "q021",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Model, Database, and Validation",
+      "title": "Debugging: User.count Does Not Increase",
+      "question": "A valid signup integration test posts name, email, password, and confirmation, but `assert_difference 'User.count', 1` fails. What is the best first debugging path?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Inspect `UsersController#create`, `user_params`, and `@user.errors.full_messages` to see whether params are missing or validation rejected the record."
+        },
+        {
+          "id": "b",
+          "text": "Remove model validations temporarily so the test can reveal the next failure."
+        },
+        {
+          "id": "c",
+          "text": "Change the test to expect no difference because account activation means users should not be saved yet."
+        },
+        {
+          "id": "d",
+          "text": "Move the signup form fields into the layout so Rails submits them before validation."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is bad params, strong parameters, duplicate fixture data, or validation errors. Inspect `UsersController`, `User` validations, test params, and logs; fix the specific rejection and keep both invalid and valid signup regression tests. The trap is confusing inactive user creation with not saving the user at all."
+    },
+    {
+      "id": "q022",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Debugging: current_user Is nil After Login",
+      "question": "A developer says login redirects to the profile, but the header still shows `Log in` because `current_user` is nil. Which issue should be checked first?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Whether `log_in user` sets `session[:user_id]` and whether `current_user` reads the same session key."
+        },
+        {
+          "id": "b",
+          "text": "Whether `remember_digest` is present, because temporary sessions require a remember digest."
+        },
+        {
+          "id": "c",
+          "text": "Whether the user has at least one micropost, because the header depends on the feed."
+        },
+        {
+          "id": "d",
+          "text": "Whether the login form uses `method: :delete`, because login and logout share the same route."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is a mismatch in session write/read logic or the helper not being included. Inspect `SessionsController#create`, `SessionsHelper#log_in`, `current_user`, and `ApplicationController`. The regression test is valid login followed by layout assertions. The trap is confusing temporary session login with persistent remember-me cookies."
+    },
+    {
+      "id": "q023",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Debugging: Invalid Login Flash Persists",
+      "question": "After an invalid login, the danger flash still appears after visiting the home page. Which fix best matches Rails behavior?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Use `flash.now[:danger]` when rendering `sessions/new` instead of `flash[:danger]`."
+        },
+        {
+          "id": "b",
+          "text": "Use `flash[:danger]` and add `session.delete(:user_id)` before rendering."
+        },
+        {
+          "id": "c",
+          "text": "Store the flash in `cookies.encrypted` so it expires after one request."
+        },
+        {
+          "id": "d",
+          "text": "Redirect to `login_url` instead of rendering, so validation messages can attach to the form object."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is using normal `flash` on a render path. Inspect `SessionsController#create` and the login integration test that visits root after failure. The fix is `flash.now` for the current request. The trap is confusing render with redirect lifetimes."
+    },
+    {
+      "id": "q024",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Authorization and Security",
+      "title": "Debugging: Wrong User Can Edit a Profile",
+      "question": "A logged-in user can visit `/users/2/edit` and update another user's email. Which missing protection is the most likely cause?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`correct_user` is missing or not applied to `edit` and `update`."
+        },
+        {
+          "id": "b",
+          "text": "`logged_in_user` is missing, so nobody is authenticated."
+        },
+        {
+          "id": "c",
+          "text": "`has_secure_password` is missing, so email validation is skipped."
+        },
+        {
+          "id": "d",
+          "text": "`will_paginate` is missing, so all users are loaded on the same page."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is missing authorization, not missing authentication. Inspect `UsersController` callbacks and tests for wrong-user edit/update. The correct fix is to compare `current_user` with the requested user and redirect otherwise. The trap is assuming logged-in status implies ownership."
+    },
+    {
+      "id": "q025",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Authorization and Security",
+      "title": "Debugging: Non-Admin Sees Delete Links",
+      "question": "A normal user sees delete links on the users index. What should be fixed without relying on CSS or JavaScript?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "The user partial should conditionally render delete links only when `current_user.admin?`, and the destroy action must still enforce `admin_user`."
+        },
+        {
+          "id": "b",
+          "text": "The index route should be changed from GET to DELETE so only admins can load it."
+        },
+        {
+          "id": "c",
+          "text": "The `admin` column should be removed so every user has the same permissions."
+        },
+        {
+          "id": "d",
+          "text": "The delete links should be hidden by Bootstrap classes because visual hiding is equivalent to authorization."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is a missing view condition, but the controller must remain the security boundary. Inspect `app/views/users/_user.html.slim`, `UsersController#destroy`, and users index tests. The trap is treating frontend visibility as backend authorization."
+    },
+    {
+      "id": "q026",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Testing and Debugging",
+      "title": "Debugging: Password Reset Token Never Expires",
+      "question": "A test sets `reset_sent_at` to 3 hours ago, but the password reset still succeeds. Which component is most likely missing or misordered?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`check_expiration` is missing from the `edit`/`update` before_action chain or does not redirect before the update."
+        },
+        {
+          "id": "b",
+          "text": "`has_secure_password` is missing from `Micropost`, so timestamps are not compared."
+        },
+        {
+          "id": "c",
+          "text": "`flash.now` is used instead of `flash`, so the expiration message disappears too quickly."
+        },
+        {
+          "id": "d",
+          "text": "`cookies.permanent` is used for remember me, so reset tokens become permanent too."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is the expiration guard not running before password update. Inspect `PasswordResetsController`, `User#password_reset_expired?`, and the expired-token integration test. The trap is mixing up remember-me persistence with password reset token lifetime."
+    },
+    {
+      "id": "q027",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Model, Database, and Validation",
+      "title": "Debugging: Microposts Survive User Deletion",
+      "question": "Deleting a user leaves their microposts in the database. Which fix best matches the intended Rails Tutorial design?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Add or restore `has_many :microposts, dependent: :destroy` on `User` and keep a model test asserting `Micropost.count` decreases."
+        },
+        {
+          "id": "b",
+          "text": "Add `belongs_to :user, dependent: :destroy` on `Micropost` so deleting one post deletes its user."
+        },
+        {
+          "id": "c",
+          "text": "Remove the `microposts.user_id` foreign key so orphaned records are allowed."
+        },
+        {
+          "id": "d",
+          "text": "Hide old microposts in the view so they no longer appear on profile pages."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is missing parent-side dependent cleanup. Inspect `User` association, schema foreign key, and the model test for associated micropost destruction. The trap is reversing parent-child ownership or hiding data instead of preserving referential integrity."
+    },
+    {
+      "id": "q028",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Testing and Debugging",
+      "title": "Debugging: Ajax Follow Updates DB But Not UI",
+      "question": "Following a user with Ajax increases `Relationship.count`, but the Follow button does not change to Unfollow. Which inspection path is most useful?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Check that the form uses `local: false`, the controller responds with `format.js`, and `create.js.erb` targets the correct DOM ids."
+        },
+        {
+          "id": "b",
+          "text": "Check that `Relationship` validations are removed, because validations prevent JavaScript from rendering."
+        },
+        {
+          "id": "c",
+          "text": "Check that the feed query includes followed users, because the follow button is rendered from the feed partial."
+        },
+        {
+          "id": "d",
+          "text": "Check that `cookies.permanent` is set, because Ajax responses require persistent login cookies."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is not the database write but the Ajax response pipeline: form mode, `respond_to`, JS template, DOM selector, or browser console errors. Tests should include `xhr: true` relationship requests. The trap is equating database state changes with UI updates."
+    },
+    {
+      "id": "q029",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Model, Database, and Validation",
+      "title": "Debugging: Feed Shows Unfollowed Posts",
+      "question": "The home feed includes microposts from a user that the current user does not follow. What is the best place to start debugging?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`User#feed`, relationship fixtures, and the tests that assert followed, self, and unfollowed posts are included or excluded."
+        },
+        {
+          "id": "b",
+          "text": "`app/views/shared/_feed.html.slim`, because rendering a collection determines which records belong in it."
+        },
+        {
+          "id": "c",
+          "text": "`SessionsHelper#current_user`, because any feed bug means the wrong user is logged in."
+        },
+        {
+          "id": "d",
+          "text": "`Micropost#display_image`, because image variants can reorder records in the feed."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is an incorrect feed query, bad relationship data, or weak tests. Inspect `User#feed`, `relationships.yml`, `microposts.yml`, and the model/integration feed tests. The trap is confusing rendering a collection with selecting the correct records."
+    },
+    {
+      "id": "q030",
+      "type": "single_choice",
+      "level": "Debugging",
+      "category": "Testing and Debugging",
+      "title": "Debugging: Image Upload Works Locally But Fails After Deploy",
+      "question": "Micropost image upload works locally, but uploaded files disappear after production restarts. Which explanation is most likely in a Heroku-style environment?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Production is using local disk storage, which is not durable on ephemeral dynos; configure S3 or another object store."
+        },
+        {
+          "id": "b",
+          "text": "The `accept` attribute on the file input is missing, so production browsers delete files after upload."
+        },
+        {
+          "id": "c",
+          "text": "`has_one_attached` should be changed to `belongs_to :image` so Active Record owns the file."
+        },
+        {
+          "id": "d",
+          "text": "The 5 MB validation causes Rails to delete valid images after every deploy."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The likely cause is environment-specific storage, not the upload form. Inspect `config/environments/production.rb`, `config/storage.yml`, production logs, and S3 credentials. The regression protection is a deployment checklist, not just a model test. The trap is confusing local disk behavior with production durability."
+    },
+    {
+      "id": "q031",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Rails Tutorial Case Study / Application Design",
+      "title": "Designing a Mini Twitter Clone",
+      "question": "You are designing this app as a mini Twitter clone with users, microposts, following, and a status feed. Which design is the best fit for the project?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Use normalized `users`, `microposts`, and `relationships` tables; build posts through `current_user`; query the feed from self and followed users; test model rules and integration flows."
+        },
+        {
+          "id": "b",
+          "text": "Store each user's microposts and followed ids as serialized strings on `users`; render the feed by parsing those strings in the view."
+        },
+        {
+          "id": "c",
+          "text": "Use scaffold CRUD for all resources and rely on hidden form fields to identify the current user and followed users."
+        },
+        {
+          "id": "d",
+          "text": "Keep follow state only in cookies so no relationship table is needed and feeds can be personalized client-side."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. Model/database design should use associations and indexes; routes/controllers should enforce ownership; views should render partials; tests should cover validation, authorization, follow/unfollow, and feed inclusion/exclusion. The trap is choosing shortcut storage or client-side ownership that breaks security and query correctness."
+    },
+    {
+      "id": "q032",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Designing Secure Remember Me",
+      "question": "A product manager asks for a 'remember me' checkbox. Which implementation best balances usability and security in this Rails app?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Generate a random remember token, store only `remember_digest` in the database, store the token in a persistent cookie, and clear both on logout or when remember me is unchecked."
+        },
+        {
+          "id": "b",
+          "text": "Store `password_digest` in a cookie so the app can authenticate the user without another database lookup."
+        },
+        {
+          "id": "c",
+          "text": "Store raw `remember_token` in the database and compare it directly with a hidden field on every request."
+        },
+        {
+          "id": "d",
+          "text": "Use only `session[:user_id]` because sessions always survive browser restarts in Rails."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The design uses model token/digest methods, session/cookie helpers, login/logout controller flow, and regression tests for remembering and forgetting. The trap is confusing session lifetime with persistent cookies or exposing raw secrets such as password digests and remember tokens."
+    },
+    {
+      "id": "q033",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Authorization and Security",
+      "title": "Designing Profile Editing Authorization",
+      "question": "You need profile editing with friendly forwarding. Which design correctly protects user data and preserves UX?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Require login for edit/update, store only GET locations before redirecting to login, then verify `current_user?(@user)` before allowing edits."
+        },
+        {
+          "id": "b",
+          "text": "Show edit links only on the current user's profile and skip controller checks to keep redirects simple."
+        },
+        {
+          "id": "c",
+          "text": "Store every blocked request including PATCH bodies in the session and replay it after login."
+        },
+        {
+          "id": "d",
+          "text": "Allow any logged-in user to edit profiles, but hide email fields unless the user owns the profile."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The model is unchanged, routes are standard users routes, controller callbacks handle authentication and authorization, the view can hide irrelevant links, and tests cover unauthenticated forwarding plus wrong-user redirects. The trap is confusing UX link hiding with backend ownership checks or replaying unsafe non-GET requests."
+    },
+    {
+      "id": "q034",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Designing Account Activation",
+      "question": "You are adding email activation before users may log in. Which flow matches the Rails Tutorial approach used by this project?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Create an inactive user, generate an activation token and digest, email a tokenized edit URL, verify token plus email, activate the user, then log them in."
+        },
+        {
+          "id": "b",
+          "text": "Do not save the user until they click the email link, and store the whole signup form in the session."
+        },
+        {
+          "id": "c",
+          "text": "Save the raw activation token in the database so support can resend the exact link."
+        },
+        {
+          "id": "d",
+          "text": "Let users log in immediately, then hide profile pages until they click the activation email."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The design spans user columns, model callbacks, mailer views, `AccountActivationsController#edit`, login checks, and integration/mailer tests. The trap is storing raw tokens or assuming profile hiding is enough while inactive users can still authenticate."
+    },
+    {
+      "id": "q035",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Authentication, Session, and Cookies",
+      "title": "Designing Password Reset",
+      "question": "A secure password reset feature is required. Which design is most appropriate for this codebase?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Generate a reset token and digest, store `reset_sent_at`, email a tokenized edit link, reject invalid/inactive/expired requests, update the password, clear the digest, and log in the user."
+        },
+        {
+          "id": "b",
+          "text": "Email the user's current password because `has_secure_password` can recover it from `password_digest`."
+        },
+        {
+          "id": "c",
+          "text": "Reuse the remember token as the reset token so users need only one persistent credential."
+        },
+        {
+          "id": "d",
+          "text": "Allow password reset whenever the submitted email exists, because email ownership was already checked at signup."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The model/database design needs reset digest and timestamp; controller filters validate the user and expiration; views include a hidden email field; tests cover invalid email, wrong token, inactive user, empty password, success, and expiration. The trap is confusing password reset tokens with remember tokens or thinking digests are reversible."
+    },
+    {
+      "id": "q036",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Rails Tutorial Case Study / Application Design",
+      "title": "Designing Micropost Image Upload",
+      "question": "You need image uploads for microposts that work in development and production. Which design is best?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Use Active Storage with `has_one_attached`, permit `:image`, validate content type and size server-side, resize variants for display, and configure durable production storage."
+        },
+        {
+          "id": "b",
+          "text": "Store uploaded binary data directly in the `microposts` table and trust the browser `accept` attribute for validation."
+        },
+        {
+          "id": "c",
+          "text": "Use only client-side JavaScript size checks because server-side validation slows down posting."
+        },
+        {
+          "id": "d",
+          "text": "Use local disk storage in every environment because Active Storage automatically copies files across deploys."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The design touches model attachment/validation, controller strong params, form file input, integration tests with `fixture_file_upload`, and production storage such as S3. The trap is trusting frontend checks or assuming local storage behaves like durable production storage."
+    },
+    {
+      "id": "q037",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Rails Tutorial Case Study / Application Design",
+      "title": "Designing Follow and Unfollow",
+      "question": "The follow button should work with normal HTML and Ajax. Which design handles both paths cleanly?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Use `RelationshipsController#create/destroy`, require login, update the relationship through `current_user`, and respond with either redirect HTML or JS templates that update the follow form and follower count."
+        },
+        {
+          "id": "b",
+          "text": "Use only JavaScript to update the follower count and save the relationship later when the user refreshes."
+        },
+        {
+          "id": "c",
+          "text": "Put follow and unfollow logic in the profile view so the controller only renders templates."
+        },
+        {
+          "id": "d",
+          "text": "Use a GET route for following because follow buttons look like navigation links."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The design uses relationship routes/controllers, model helper methods, `local: false` forms, JS templates, and integration tests for normal and XHR requests. The trap is treating Ajax as the source of truth or using GET for state-changing actions."
+    },
+    {
+      "id": "q038",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Rails Tutorial Case Study / Application Design",
+      "title": "Designing the Status Feed Query",
+      "question": "For a large number of followed users, which feed design is closest to the tutorial's intended approach?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Use a database query with a subselect for followed ids plus the current user's id, relying on indexes and tests for self, followed, and unfollowed posts."
+        },
+        {
+          "id": "b",
+          "text": "Load every micropost into Ruby and filter the array in the view because views know which posts are displayed."
+        },
+        {
+          "id": "c",
+          "text": "Store the complete feed in a cookie so the database is not queried on the home page."
+        },
+        {
+          "id": "d",
+          "text": "Show all recent posts and hide unfollowed users with CSS to keep the SQL simple."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The design puts feed selection in the model/query layer, uses indexes, keeps rendering simple, and tests inclusion/exclusion cases. The trap is confusing feed rendering with feed correctness or moving large filtering work into Ruby/views."
+    },
+    {
+      "id": "q039",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Rails Tutorial Case Study / Application Design",
+      "title": "Refactoring Scaffold Code",
+      "question": "A scaffolded toy app has working CRUD for users and microposts. Which refactor moves it toward production-grade Rails Tutorial code?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Add model validations and DB constraints, secure passwords, strong parameters, authentication, authorization callbacks, partials, and regression tests."
+        },
+        {
+          "id": "b",
+          "text": "Keep scaffold controllers unchanged and add more Bootstrap classes so the UI discourages invalid actions."
+        },
+        {
+          "id": "c",
+          "text": "Move validations into controllers because scaffold models should stay thin."
+        },
+        {
+          "id": "d",
+          "text": "Use hidden fields for ownership and admin flags because scaffold forms already map cleanly to database columns."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. Production-grade refactoring touches model invariants, database safety, controller security, view structure, and test coverage. The trap is thinking scaffold CRUD is equivalent to secure application behavior; hidden fields and visual polish do not replace backend rules."
+    },
+    {
+      "id": "q040",
+      "type": "single_choice",
+      "level": "Case Study",
+      "category": "Rails Tutorial Case Study / Application Design",
+      "title": "Preparing Deployment for Tutorial Features",
+      "question": "Before deploying this Rails Tutorial app, which checklist best addresses the features implemented in the project?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Run tests, apply production migrations, configure ENV secrets for SMTP/storage, verify logs, serve assets correctly, and use durable storage for uploads."
+        },
+        {
+          "id": "b",
+          "text": "Skip tests in production, rely on local SQLite data, and configure SMTP only after the first activation email fails."
+        },
+        {
+          "id": "c",
+          "text": "Commit `.env` so Heroku-style deployment can read Gmail and storage credentials directly from the repository."
+        },
+        {
+          "id": "d",
+          "text": "Disable account activation and image validation in production because they depend on external services."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "The correct answer is A. The deployment design must cover database schema, environment variables, mailer delivery, asset/static file behavior, logs, and Active Storage. The trap is confusing local development success with production readiness or leaking secrets through source control."
+    }
+  ]
+}

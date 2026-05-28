@@ -1,0 +1,1140 @@
+{
+  "quiz_id": "rails_advanced_syntax_vn_01",
+  "title": "Ruby on Rails Tutorial - Bộ câu hỏi nâng cao về cú pháp và cơ chế Rails",
+  "description": "Bộ 40 câu hỏi trắc nghiệm tiếng Việt có dấu, tập trung vào cú pháp Rails nâng cao, built-in methods, Rails objects, Active Record, controller flow, helper/view syntax, routing, bảo mật, kiểm thử và các bẫy thực tế trong dự án hello_app.",
+  "time_limit": 4800,
+  "passing_score": 80,
+  "difficulty": "Rất khó",
+  "tags": [
+    "Ruby on Rails",
+    "Rails Tutorial",
+    "Active Record",
+    "Action Controller",
+    "Action View",
+    "Authentication",
+    "Testing",
+    "Vietnamese"
+  ],
+  "grading": {
+    "score_type": "points",
+    "allow_partial_score": false,
+    "multiple_choice_scoring": {
+      "mode": "exact_match"
+    },
+    "case_study_scoring": {
+      "score_by_sub_questions": true
+    }
+  },
+  "ui_config": {
+    "show_progress_bar": true,
+    "show_timer": true,
+    "show_question_number": true,
+    "show_explanation_after_submit": true,
+    "allow_review_before_submit": true,
+    "allow_back_navigation": true
+  },
+  "result_messages": [
+    {
+      "min_score": 0,
+      "max_score": 59,
+      "message": "Bạn cần đọc lại Rails Tutorial và rà kỹ cơ chế Active Record, controller callback, helper/view, route helper và test flow."
+    },
+    {
+      "min_score": 60,
+      "max_score": 79,
+      "message": "Bạn đã nắm được nhiều phần, nhưng vẫn còn nhầm lẫn ở các bẫy Rails nâng cao."
+    },
+    {
+      "min_score": 80,
+      "max_score": 91,
+      "message": "Tốt. Bạn có thể giải thích phần lớn cơ chế Rails như một Rails intern vững."
+    },
+    {
+      "min_score": 92,
+      "max_score": 100,
+      "message": "Xuất sắc. Bạn có khả năng review Rails code ở mức rất cẩn thận."
+    }
+  ],
+  "questions": [
+    {
+      "id": "q001",
+      "type": "single_choice",
+      "title": "[A1] ApplicationRecord và abstract_class",
+      "question": "Đọc đoạn code:\n\n```ruby\nclass ApplicationRecord < ActiveRecord::Base\n  self.abstract_class = true\nend\n\nclass User < ApplicationRecord\nend\n```\n\nTrong dự án này, nhận định nào chính xác nhất nếu một mentor hỏi vì sao model không kế thừa trực tiếp `ActiveRecord::Base`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`ApplicationRecord` là lớp gốc riêng của app để gom logic model dùng chung; `self.abstract_class = true` báo cho Rails không ánh xạ lớp này thành bảng riêng."
+        },
+        {
+          "id": "b",
+          "text": "`ApplicationRecord` thay thế hoàn toàn `ActiveRecord::Base`, nên các model con không còn nhận các method như `where`, `find`, `valid?` từ Active Record."
+        },
+        {
+          "id": "c",
+          "text": "`self.abstract_class = true` khiến `User` không được lưu vào database cho đến khi khai báo lại `self.table_name` trong từng model."
+        },
+        {
+          "id": "d",
+          "text": "`ApplicationRecord` chỉ dùng để Rails tự động load fixtures trong test, không ảnh hưởng đến model runtime."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy nằm ở việc nhầm `ApplicationRecord` với một lớp thay thế Active Record độc lập. Thực tế `ApplicationRecord` vẫn kế thừa `ActiveRecord::Base`, nên `User`, `Micropost`, `Relationship` vẫn nhận query API, persistence API, validations và callbacks. `self.abstract_class = true` ngăn Rails xem `application_records` là bảng thật. Câu này liên quan tầng model trong `app/models/application_record.rb`. Nếu hiểu sai, người học có thể đặt logic bảng cụ thể vào `ApplicationRecord` hoặc xóa abstract class, gây lỗi mapping bảng khó debug. Test model như `UserTest` hoặc console query `User.where(...)` sẽ phát hiện hành vi bất thường."
+    },
+    {
+      "id": "q002",
+      "type": "single_choice",
+      "title": "[A2] ApplicationController, SessionsHelper và helper_method",
+      "question": "Tình huống: một bạn chuyển toàn bộ `current_user`, `logged_in?` từ `SessionsHelper` vào `ApplicationController` dưới phần `private`, rồi view `_header.html.slim` gọi `current_user` bị lỗi. Cách giải thích nào đúng nhất về cơ chế Rails?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Method private trong controller dùng được cho controller callback, nhưng view không tự thấy; nếu đặt trong controller thì cần `helper_method :current_user, :logged_in?` hoặc giữ chúng trong helper được view include."
+        },
+        {
+          "id": "b",
+          "text": "Mọi method trong `ApplicationController` luôn tự động thành Action View helper, nhưng lỗi xảy ra vì method có dấu `?` ở cuối."
+        },
+        {
+          "id": "c",
+          "text": "View chỉ gọi được method public của model, nên `current_user` bắt buộc phải chuyển vào `User` class method."
+        },
+        {
+          "id": "d",
+          "text": "Rails chỉ cho view gọi helper nếu helper được khai báo trong `config/routes.rb` bằng named route."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm method có sẵn trong controller với method có sẵn trong view. Trong dự án này `ApplicationController` include `SessionsHelper` để controller dùng được `logged_in?`, `store_location`, còn view cũng có helper module. Nếu tự định nghĩa trong controller, phải expose bằng `helper_method` nếu view cần gọi. Tệp liên quan là `app/controllers/application_controller.rb`, `app/helpers/sessions_helper.rb`, `app/views/layouts/_header.html.slim`. Bug thực tế là header không render được hoặc `undefined method current_user`. Integration test login/logout có `assert_select` link trong header có thể bắt lỗi."
+    },
+    {
+      "id": "q003",
+      "type": "single_choice",
+      "title": "[A3] ApplicationMailer và ActionMailer::Base",
+      "question": "Đọc đoạn code:\n\n```ruby\nclass ApplicationMailer < ActionMailer::Base\n  default from: ENV.fetch('SMTP_FROM_EMAIL', 'noreply@example.com')\n  layout 'mailer'\nend\n```\n\nKhi `UserMailer.account_activation(user)` gửi mail, nhận định nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`ApplicationMailer` cung cấp cấu hình mặc định cho các mailer con; `default from:` đọc ENV khi tạo email và `layout 'mailer'` chọn layout mailer tương ứng."
+        },
+        {
+          "id": "b",
+          "text": "`ApplicationMailer` là controller đặc biệt nên dùng `redirect_to` để điều hướng sau khi gửi email activation."
+        },
+        {
+          "id": "c",
+          "text": "`default from:` chỉ ảnh hưởng mailer test, còn production luôn lấy địa chỉ gửi từ `config/routes.rb`."
+        },
+        {
+          "id": "d",
+          "text": "`layout 'mailer'` bắt buộc email chỉ có bản text, nên file HTML trong `app/views/user_mailer` bị bỏ qua."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm mailer với controller hoặc nhầm ENV mail config với routing. `ApplicationMailer` kế thừa `ActionMailer::Base`, còn `UserMailer` kế thừa `ApplicationMailer`, nên nhận default sender và layout. Tệp liên quan: `app/mailers/application_mailer.rb`, `app/mailers/user_mailer.rb`, `app/views/user_mailer/*`. Nếu cấu hình ENV sai, production có thể gửi sai From hoặc fail SMTP. `UserMailerTest` kiểm tra `mail.from`, subject, token và email trong body."
+    },
+    {
+      "id": "q004",
+      "type": "single_choice",
+      "title": "[A4] Convention over configuration trong controller và view",
+      "question": "Tình huống: `UsersController#edit` để trống:\n\n```ruby\ndef edit; end\n```\n\nNhưng request `GET /users/:id/edit` vẫn render form edit. Cơ chế nào giải thích đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Rails dùng convention: sau khi callbacks chạy và action không render/redirect rõ ràng, Action Controller tự render template khớp tên action, ở đây là `app/views/users/edit.html.slim`."
+        },
+        {
+          "id": "b",
+          "text": "`resources :users` trong route tự render view nên controller action có thể bị bỏ qua hoàn toàn."
+        },
+        {
+          "id": "c",
+          "text": "`form_with(model: @user)` tự gọi lại action `edit` lần hai để render template nếu action rỗng."
+        },
+        {
+          "id": "d",
+          "text": "`before_action :correct_user` tự render `edit.html.slim`, còn action rỗng chỉ tồn tại để tránh lỗi syntax."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ route hoặc form helper render view thay cho controller. Cơ chế thật là implicit rendering của Action Controller: nếu action kết thúc mà chưa `render` hoặc `redirect_to`, Rails tìm template theo controller/action. Trong dự án, callbacks `logged_in_user` và `correct_user` vẫn quan trọng để set/kiểm tra `@user`. Nếu thiếu callback, view có thể render cho sai user. Integration test `users_edit_test.rb` với `assert_template 'users/edit'` và wrong-user redirect bắt được lỗi."
+    },
+    {
+      "id": "q005",
+      "type": "single_choice",
+      "title": "[A5] ActionController::Base, CSRF và delete link",
+      "question": "Đọc layout có:\n\n```slim\n= csrf_meta_tags\n= link_to 'Log out', logout_path, method: :delete\n```\n\nTrong app Rails thông thường kế thừa `ActionController::Base`, hiểu thế nào là chính xác nhất về bảo vệ request?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`csrf_meta_tags` cung cấp token cho form/UJS request; nó chống CSRF nhưng không thay thế authorization như `logged_in_user` hay `admin_user`."
+        },
+        {
+          "id": "b",
+          "text": "`csrf_meta_tags` chứng minh user là admin, nên action `destroy` không cần `before_action :admin_user`."
+        },
+        {
+          "id": "c",
+          "text": "`method: :delete` biến link thành DELETE ở server mà không cần JavaScript hoặc token nào."
+        },
+        {
+          "id": "d",
+          "text": "CSRF token chỉ dùng cho mailer view, còn HTML layout không liên quan đến controller request."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm CSRF protection với authorization. `ActionController::Base` cung cấp nền tảng controller web, Rails UJS/form helpers dùng CSRF token để chống request giả mạo từ site khác. Nhưng token không nói user có quyền xóa user hay micropost. Tầng liên quan gồm layout, route DELETE, controller callbacks. Bug thực tế: non-admin vẫn xóa được nếu chỉ dựa vào token hoặc link ẩn. Test `users_controller_test.rb` với non-admin destroy mới bắt đúng lỗi phân quyền."
+    },
+    {
+      "id": "q006",
+      "type": "single_choice",
+      "title": "[A6] Rails autoloading và tên lớp theo file",
+      "question": "Tình huống: bạn đổi `app/models/relationship.rb` thành `class FollowLink < ApplicationRecord` nhưng vẫn giữ `has_many :active_relationships, class_name: 'Relationship'`. Lỗi nào là bản chất nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Rails convention mong hằng `Relationship` khớp file/model và association `class_name`; đổi class mà không đổi association, table/model mapping sẽ lệch."
+        },
+        {
+          "id": "b",
+          "text": "Tên class trong model không quan trọng vì Rails chỉ dựa vào tên bảng `relationships` trong `schema.rb`."
+        },
+        {
+          "id": "c",
+          "text": "`class_name` chỉ ảnh hưởng view partial, không ảnh hưởng Active Record association."
+        },
+        {
+          "id": "d",
+          "text": "Rails sẽ tự suy luận `FollowLink` là alias của `Relationship` nếu hai class cùng kế thừa `ApplicationRecord`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là xem convention over configuration như cơ chế tự sửa mọi lệch tên. Active Record association dùng hằng class để build query và instantiate object; `class_name: 'Relationship'` cần class thật tên `Relationship`. Tệp liên quan: `app/models/relationship.rb`, `app/models/user.rb`. Bug thực tế là NameError hoặc association không load. Test model `RelationshipTest` và `UserTest` follow/unfollow sẽ bắt lỗi."
+    },
+    {
+      "id": "q007",
+      "type": "single_choice",
+      "title": "[B1] find và find_by trong controller flow",
+      "question": "Đọc hai cách tìm record:\n\n```ruby\n@user = User.find(params[:id])\nuser = User.find_by(email: params[:email])\n```\n\nTrong controller, khác biệt nào quan trọng nhất đối với exception handling và UX?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`find` raise `ActiveRecord::RecordNotFound` khi không thấy primary key, còn `find_by` trả về `nil`, nên controller phải tự xử lý nhánh nil."
+        },
+        {
+          "id": "b",
+          "text": "`find` và `find_by` đều trả về `nil`; khác biệt duy nhất là `find_by` chỉ dùng được với email."
+        },
+        {
+          "id": "c",
+          "text": "`find_by` luôn raise exception, còn `find` chỉ trả `nil` khi id không tồn tại."
+        },
+        {
+          "id": "d",
+          "text": "`find` bỏ qua default scope, còn `find_by` luôn áp dụng default scope của model cha."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ mọi query không thấy record đều trả `nil`. Trong Rails, `find(id)` dùng primary key và raise exception nếu không có record; `find_by(...)` trả `nil`. Trong dự án, `UsersController#set_user` dùng `find`, còn activation/reset dùng `find_by(email: ...)` vì cần xử lý link sai bằng redirect. Bug thực tế: gọi method trên `nil` nếu dùng `find_by` mà quên check, hoặc 404 nếu dùng `find` ở flow cần thông báo thân thiện. Controller/integration tests cho wrong email/token bắt lỗi này."
+    },
+    {
+      "id": "q008",
+      "type": "single_choice",
+      "title": "[B2] where, SQL subselect và ActiveRecord::Relation",
+      "question": "Đọc `User#feed`:\n\n```ruby\nfollowing_ids = 'SELECT followed_id FROM relationships WHERE follower_id = :user_id'\nMicropost.where('user_id IN (' + following_ids + ') OR user_id = :user_id', user_id: id)\n```\n\nNhận định nào đúng nhất về `where` ở đây?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`where` trả về `ActiveRecord::Relation` có thể tiếp tục chain/paginate; bind `:user_id` giúp tránh nối trực tiếp dữ liệu user vào SQL."
+        },
+        {
+          "id": "b",
+          "text": "`where` luôn trả về Array Ruby ngay lập tức, nên `paginate` chạy trên Array chứ không còn SQL."
+        },
+        {
+          "id": "c",
+          "text": "Vì có subselect, Rails bỏ qua mọi index trên `relationships` và `microposts`."
+        },
+        {
+          "id": "d",
+          "text": "Dùng `where` trong model luôn bỏ qua `default_scope`, nên feed không thể tự sắp xếp mới nhất trước."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm `ActiveRecord::Relation` với Array và nhầm SQL string có bind với nối chuỗi nguy hiểm. `where` tạo relation lazy, có thể chain với pagination và chịu ảnh hưởng scope/order. Tệp liên quan là `app/models/user.rb`, `app/models/micropost.rb`. Nếu nối trực tiếp `params` vào SQL, có rủi ro injection; nếu load Array sớm, feed kém hiệu năng. Test `feed should have the right posts` bắt sai inclusion/exclusion."
+    },
+    {
+      "id": "q009",
+      "type": "single_choice",
+      "title": "[B3] new, build và create qua association",
+      "question": "Tình huống: trong `MicropostsController#create`, bạn thay:\n\n```ruby\n@micropost = current_user.microposts.build(micropost_params)\n```\n\nbằng:\n\n```ruby\n@micropost = Micropost.new(micropost_params)\n```\n\nNếu `micropost_params` không permit `user_id`, hậu quả cơ chế nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`build` qua association tự gán foreign key từ `current_user`; `Micropost.new` không gán `user_id`, nên validation/DB constraint có thể làm save fail."
+        },
+        {
+          "id": "b",
+          "text": "`Micropost.new` tự đọc `session[:user_id]` nếu controller đã include `SessionsHelper`, nên hai cách tương đương."
+        },
+        {
+          "id": "c",
+          "text": "`build` lưu record ngay vào database, còn `new` chỉ validate, nên thay đổi này làm tạo post hai lần."
+        },
+        {
+          "id": "d",
+          "text": "`new` luôn an toàn hơn vì nó bỏ qua mass assignment và tự khóa ownership."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ `new` và association `build` chỉ khác phong cách. `current_user.microposts.build` tạo object chưa lưu nhưng đã set `user_id` theo association, vừa đúng ownership vừa tránh tin `params[:user_id]`. Tệp liên quan: `app/controllers/microposts_controller.rb`, `app/models/micropost.rb`. Bug thực tế là `Micropost.count` không tăng hoặc user giả mạo owner nếu permit `user_id`. Integration test micropost interface và controller test create khi chưa login sẽ bắt lỗi."
+    },
+    {
+      "id": "q010",
+      "type": "single_choice",
+      "title": "[B4] save, create, create! và errors",
+      "question": "Đọc tình huống signup: controller dùng `@user = User.new(user_params)` rồi `if @user.save`. Vì sao cách này khác đáng kể với `User.create!(user_params)` trong action web?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`save` trả true/false và giữ `@user.errors` để render form; `create!` raise exception khi invalid, làm flow validation thân thiện bị phá nếu không rescue."
+        },
+        {
+          "id": "b",
+          "text": "`create!` không chạy validations, còn `save` luôn chạy validations hai lần."
+        },
+        {
+          "id": "c",
+          "text": "`save` lưu thẳng database không cần transaction, còn `create!` chỉ tạo object trong memory."
+        },
+        {
+          "id": "d",
+          "text": "`User.create!` tự động gửi activation email, còn `save` không thể gọi mailer sau đó."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm bang method với phiên bản nhanh hơn hoặc bỏ qua validation. Trong web form, invalid input là tình huống bình thường nên `save` + `render 'new'` + `@user.errors` phù hợp. `create!` hữu ích trong seed/test setup khi muốn fail loud. Tệp liên quan: `UsersController#create`, `shared/_error_messages`. Bug thực tế: invalid signup thành 500 thay vì hiện lỗi. Integration test invalid signup với `assert_no_difference` và `assert_template` bắt lỗi."
+    },
+    {
+      "id": "q011",
+      "type": "single_choice",
+      "title": "[B5] update, update_attribute và callback/validation",
+      "question": "Tình huống: trong `User#remember` dự án dùng:\n\n```ruby\nupdate_attribute(:remember_digest, User.digest(remember_token))\n```\n\nCòn password reset dùng:\n\n```ruby\nupdate_columns(reset_digest: User.digest(reset_token), reset_sent_at: Time.zone.now)\n```\n\nNhận định nào đúng nhất về bẫy khi copy các method này sang update profile?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`update_attribute` bỏ qua validations nhưng chạy callbacks, `update_columns` bỏ qua validations/callbacks; dùng bừa cho profile có thể vượt qua validation và callback quan trọng."
+        },
+        {
+          "id": "b",
+          "text": "`update_attribute` và `update_columns` đều tương đương `update`, chỉ khác tên method cũ và mới."
+        },
+        {
+          "id": "c",
+          "text": "`update_columns` chạy `before_save` nên luôn downcase email, còn `update_attribute` thì không."
+        },
+        {
+          "id": "d",
+          "text": "`update` bỏ qua validations, còn `update_attribute` mới là method an toàn nhất cho form người dùng."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là thấy tutorial dùng method cập nhật nhanh cho digest rồi áp dụng cho dữ liệu người dùng. `update` phù hợp cho form vì chạy validations; `update_attribute` bỏ validations; `update_columns` ghi trực tiếp hơn nữa. Tệp liên quan: `app/models/user.rb`, `password_resets_controller.rb`, `users_controller.rb`. Bug thực tế là email invalid hoặc password ngắn vẫn được lưu, hoặc callback downcase không chạy. Model/integration tests về validation và edit profile sẽ bắt lỗi."
+    },
+    {
+      "id": "q012",
+      "type": "single_choice",
+      "title": "[B6] before_save, self và assignment trong Ruby model",
+      "question": "Đọc callback trong model:\n\n```ruby\nbefore_save :downcase_email\n\ndef downcase_email\n  self.email = email.downcase\nend\n```\n\nVì sao `self.email = ...` ở vế trái không nên bị đổi thành `email = email.downcase`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Trong Ruby, assignment không có `self.` sẽ tạo local variable `email`, không gọi writer `email=`, nên attribute Active Record không được cập nhật."
+        },
+        {
+          "id": "b",
+          "text": "`self.email` chỉ cần trong class method, còn instance method phải luôn dùng local variable để Active Record detect change."
+        },
+        {
+          "id": "c",
+          "text": "`email.downcase` tự lưu database ngay lập tức nên `self.email =` sẽ làm save hai lần."
+        },
+        {
+          "id": "d",
+          "text": "`before_save` chỉ cho phép đọc attribute, không cho phép ghi attribute trong callback."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm cú pháp Ruby với Rails DSL. Trong model, gọi reader bên phải có thể bỏ `self`, nhưng gọi writer bên trái cần `self.email =` để Ruby hiểu là method assignment chứ không phải local variable. Rails Tutorial nhấn mạnh điểm này ở phần downcase email. Bug thực tế là email không được chuẩn hóa, làm uniqueness/index case-sensitive bị lệch. Test `email addresses should be saved as lower-case` bắt lỗi."
+    },
+    {
+      "id": "q013",
+      "type": "single_choice",
+      "title": "[B7] default_scope và fixture ordering",
+      "question": "Đọc model:\n\n```ruby\nclass Micropost < ApplicationRecord\n  default_scope -> { order(created_at: :desc) }\nend\n```\n\nVì sao test `assert_equal microposts(:most_recent), Micropost.first` cần fixtures có `created_at` rõ ràng?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`default_scope` áp order khi query, nhưng record nào mới nhất phụ thuộc dữ liệu timestamp; fixture không chủ ý có thể làm `first` không ổn định."
+        },
+        {
+          "id": "b",
+          "text": "`default_scope` tự gán `created_at` mới nhất cho fixture tên `most_recent`, nên timestamp trong fixture chỉ để đọc."
+        },
+        {
+          "id": "c",
+          "text": "`Micropost.first` luôn bỏ qua default scope; test chỉ pass vì Rails sắp xếp fixture theo tên alphabet."
+        },
+        {
+          "id": "d",
+          "text": "Fixtures không được Active Record query, nên `default_scope` chỉ ảnh hưởng production data."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ tên fixture quyết định order. `default_scope` chỉ thêm `ORDER BY created_at DESC`; dữ liệu timestamp mới quyết định kết quả. Tệp liên quan: `app/models/micropost.rb`, `test/fixtures/microposts.yml`, `test/models/micropost_test.rb`. Bug thực tế là test thứ tự pass/fail ngẫu nhiên khi fixture timestamps không rõ. Regression test ordering bắt lỗi."
+    },
+    {
+      "id": "q014",
+      "type": "single_choice",
+      "title": "[C1] belongs_to, foreign key và validation ngầm",
+      "question": "Đọc model:\n\n```ruby\nclass Micropost < ApplicationRecord\n  belongs_to :user\n  validates :user_id, presence: true\nend\n```\n\nTrong Rails 6, nhận định nào tinh tế nhất về association và ràng buộc dữ liệu?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`belongs_to :user` diễn tả child có foreign key `user_id`; validation/model và DB null/foreign key constraint bổ sung cho nhau, không nên chỉ dựa vào một phía."
+        },
+        {
+          "id": "b",
+          "text": "`belongs_to :user` tự tạo cột `user_id` trong database khi app boot, nên migration không cần khai báo foreign key."
+        },
+        {
+          "id": "c",
+          "text": "`validates :user_id` đủ thay cho foreign key vì validation luôn chạy với mọi thao tác ghi database."
+        },
+        {
+          "id": "d",
+          "text": "`belongs_to` nghĩa là user thuộc về micropost, nên xóa micropost phải xóa user bằng `dependent: :destroy`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là đảo chiều ownership hoặc nghĩ association tự sửa schema. Trong dự án, migration thêm null constraint và foreign key cho `microposts.user_id`, còn model validation cho lỗi thân thiện. Tệp liên quan: `app/models/micropost.rb`, migration add user reference constraints, `db/schema.rb`. Bug thực tế: orphan records hoặc lỗi DB không được xử lý đẹp. Model test `user id should be present` và DB constraint cùng bảo vệ."
+    },
+    {
+      "id": "q015",
+      "type": "single_choice",
+      "title": "[C2] dependent: :destroy khác xóa thủ công",
+      "question": "Tình huống: một bạn bỏ `dependent: :destroy` khỏi `User` và tự thêm vòng lặp xóa micropost trong `UsersController#destroy`. Vì sao đây là refactor kém hơn?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`dependent: :destroy` đặt ownership ở model, chạy destroy callbacks của child và áp dụng ở mọi nơi user bị destroy, không chỉ một controller action."
+        },
+        {
+          "id": "b",
+          "text": "`dependent: :destroy` chỉ xóa trong memory, còn controller loop mới xóa database thật."
+        },
+        {
+          "id": "c",
+          "text": "Xóa thủ công trong controller tốt hơn vì tránh mọi callback của micropost và luôn nhanh hơn."
+        },
+        {
+          "id": "d",
+          "text": "`dependent: :destroy` chỉ hoạt động với `belongs_to`, không dùng được cho `has_many`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là đặt business/data ownership vào controller flow cụ thể. Association option thuộc tầng model, nên dù user bị xóa từ console, admin action hay test setup, child records vẫn được xử lý nhất quán và callbacks được gọi. Tệp liên quan: `app/models/user.rb`, `UsersController#destroy`. Bug thực tế là orphan micropost nếu xóa user ngoài controller đó. Test `associated microposts should be destroyed` bắt lỗi."
+    },
+    {
+      "id": "q016",
+      "type": "single_choice",
+      "title": "[C3] class_name và foreign_key trong self-referential association",
+      "question": "Đọc association:\n\n```ruby\nhas_many :active_relationships,\n         class_name: 'Relationship',\n         foreign_key: 'follower_id',\n         dependent: :destroy\n```\n\nPhần nào giải quyết vấn đề nào?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`class_name` nói association dùng model `Relationship`; `foreign_key` nói cột trên bảng relationships trỏ về user hiện tại là `follower_id`."
+        },
+        {
+          "id": "b",
+          "text": "`class_name` nói tên bảng là `active_relationships`; `foreign_key` nói Rails tự tạo model `Follower`."
+        },
+        {
+          "id": "c",
+          "text": "`foreign_key` chỉ dùng để đặt tên route helper; `class_name` mới quyết định cột SQL."
+        },
+        {
+          "id": "d",
+          "text": "Cả hai chỉ cần cho view partial; Active Record có thể tự suy luận đầy đủ từ tên `active_relationships`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm tên association với tên model/table thật. Vì `active_relationships` không tương ứng model `ActiveRelationship`, Rails cần `class_name`. Vì foreign key không phải `user_id`, Rails cần `foreign_key`. Tệp liên quan: `app/models/user.rb`, `app/models/relationship.rb`. Bug thực tế là Rails query sai cột hoặc tìm class không tồn tại. Relationship model test và follow/unfollow test bắt lỗi."
+    },
+    {
+      "id": "q017",
+      "type": "single_choice",
+      "title": "[C4] source trong has_many :through",
+      "question": "Đọc association:\n\n```ruby\nhas_many :following, through: :active_relationships, source: :followed\n```\n\nVì sao `source: :followed` là chi tiết dễ sai?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`following` không trùng tên association trên `Relationship`, nên `source: :followed` chỉ rõ Rails phải lấy user ở phía `belongs_to :followed`."
+        },
+        {
+          "id": "b",
+          "text": "`source` chỉ định controller action sẽ xử lý route `/following`, không liên quan đến model association."
+        },
+        {
+          "id": "c",
+          "text": "`source` đổi foreign key từ `follower_id` sang `followed_id` trong bảng users."
+        },
+        {
+          "id": "d",
+          "text": "`source` là tùy chọn hiệu năng; bỏ đi vẫn luôn đúng vì Rails biết `following` là số nhiều của `followed`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ Rails suy luận được mọi tên tiếng Anh. `has_many :following` qua `active_relationships` cần biết association đích trên `Relationship` là `followed`; nếu thiếu `source`, Rails có thể tìm association tên `following` trên `Relationship` và fail. Tệp liên quan: `app/models/user.rb`. Bug thực tế là `user.following` lỗi hoặc trả sai dữ liệu. Test `should follow and unfollow a user` và following page bắt lỗi."
+    },
+    {
+      "id": "q018",
+      "type": "single_choice",
+      "title": "[C5] Unique compound index không thay thế UI logic",
+      "question": "Tình huống: bảng relationships có migration:\n\n```ruby\nadd_index :relationships, [:follower_id, :followed_id], unique: true\n```\n\nVì sao vẫn cần logic `following?`, follow/unfollow form và test controller?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Unique index là hàng rào cuối ở database chống duplicate; UI/controller vẫn cần tránh request sai, hiển thị đúng trạng thái và xử lý authorization."
+        },
+        {
+          "id": "b",
+          "text": "Unique index chỉ tăng tốc query, không bao giờ enforce uniqueness trong database."
+        },
+        {
+          "id": "c",
+          "text": "Nếu có unique index, `current_user.follow(@user)` tự động chuyển thành unfollow khi record đã tồn tại."
+        },
+        {
+          "id": "d",
+          "text": "Unique index thay thế hoàn toàn model validation và login requirement cho `RelationshipsController`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm database constraint với toàn bộ behavior sản phẩm. Index unique bảo vệ consistency khi có request duplicate hoặc curl, nhưng không quyết định nút Follow/Unfollow, không kiểm tra login, không render Ajax. Tệp liên quan: migration relationships, `RelationshipsController`, follow form partials. Bug thực tế là exception DB thay vì UX tốt hoặc non-login tạo relationship. Tests controller và integration following bắt lỗi."
+    },
+    {
+      "id": "q019",
+      "type": "single_choice",
+      "title": "[C6] schema.rb không phải nơi sửa schema",
+      "question": "Một intern thấy `db/schema.rb` thiếu unique index cho email và sửa trực tiếp file này. Nhận định nào đúng nhất theo Rails Tutorial?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Nên tạo migration như `add_index :users, :email, unique: true`; `schema.rb` là kết quả snapshot từ migration, không phải nguồn thay đổi thủ công."
+        },
+        {
+          "id": "b",
+          "text": "Sửa `schema.rb` là đủ, vì Rails đọc file này trước mỗi request và tự thay đổi database."
+        },
+        {
+          "id": "c",
+          "text": "Unique index email nên đặt trong `User` model bằng `validates uniqueness: true`, không bao giờ cần migration."
+        },
+        {
+          "id": "d",
+          "text": "Chỉ cần sửa fixtures để email không trùng; production database không cần unique index."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm `schema.rb` với migration source. Rails Tutorial nhấn mạnh thay đổi data model bằng migrations; `schema.rb` được regenerate từ trạng thái database. Model uniqueness validation cho UX, còn DB unique index chống race condition và cải thiện lookup. Tệp liên quan: `db/schema.rb`, migrations, `User` validation. Bug thực tế là duplicate email dưới concurrent signup. Model test và migration/schema review bắt lỗi."
+    },
+    {
+      "id": "q020",
+      "type": "single_choice",
+      "title": "[D1] before_action order và filter chain",
+      "question": "Tình huống: trong `UsersController` có:\n\n```ruby\nbefore_action :logged_in_user, only: [:index, :edit, :update, :destroy]\nbefore_action :correct_user,   only: [:edit, :update]\nbefore_action :admin_user,     only: :destroy\nbefore_action :set_user,       only: [:show, :destroy]\n```\n\nBẫy callback order nào nguy hiểm nhất với `destroy`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`admin_user` dùng `current_user.admin?`, nên phải chắc chắn request chưa login bị chặn trước; callback order sai có thể gọi `admin?` trên nil."
+        },
+        {
+          "id": "b",
+          "text": "`set_user` phải luôn chạy trước `logged_in_user`, vì authentication cần target user để đọc session."
+        },
+        {
+          "id": "c",
+          "text": "`before_action` luôn chạy theo thứ tự alphabet của method name, nên thứ tự khai báo không có ý nghĩa."
+        },
+        {
+          "id": "d",
+          "text": "`admin_user` tự động gọi `logged_in_user` nếu user chưa login vì cả hai đều là private methods."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là xem callbacks độc lập với thứ tự. Rails chạy callbacks theo thứ tự khai báo, và `admin_user` giả định có `current_user`. Trong dự án, `logged_in_user` được khai báo trước cho destroy để chặn nil. Tệp liên quan: `app/controllers/users_controller.rb`. Bug thực tế là unauthenticated DELETE gây NoMethodError thay vì redirect login. Controller test `should redirect destroy when not logged in` bắt lỗi."
+    },
+    {
+      "id": "q021",
+      "type": "single_choice",
+      "title": "[D2] Strong parameters không giống params hash thường",
+      "question": "Tình huống: một bạn thay:\n\n```ruby\nparams.require(:user).permit(:name, :email, :password, :password_confirmation)\n```\n\nbằng:\n\n```ruby\nparams[:user]\n```\n\nvì form hiện tại chỉ có bốn field đó. Bẫy bảo mật nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Client có thể gửi thêm field ngoài form như `admin`; strong parameters whitelist ở server mới quyết định thuộc tính nào được mass-assign."
+        },
+        {
+          "id": "b",
+          "text": "`params[:user]` luôn thiếu password vì Rails không đưa password vào params để bảo mật."
+        },
+        {
+          "id": "c",
+          "text": "`permit` chỉ dùng để format JSON response, không ảnh hưởng Active Record update."
+        },
+        {
+          "id": "d",
+          "text": "`require(:user)` chỉ kiểm tra route name, không liên quan payload form."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là tin form HTML giới hạn được request. Strong parameters là boundary ở controller: `require` xác định nested key bắt buộc, `permit` whitelist attributes cho mass assignment. Tệp liên quan: `UsersController#user_params`. Bug thực tế là privilege escalation qua `admin: true`. Test `should not allow the admin attribute to be edited via the web` bắt lỗi."
+    },
+    {
+      "id": "q022",
+      "type": "single_choice",
+      "title": "[D3] session và cookies trong current_user",
+      "question": "Đọc đoạn helper:\n\n```ruby\ndef current_user\n  if (user_id = session[:user_id])\n    @current_user ||= User.find_by(id: user_id)\n  elsif (user_id = cookies.encrypted[:user_id])\n    user = User.find_by(id: user_id)\n    if user && user.authenticated?(:remember, cookies[:remember_token])\n      log_in user\n      @current_user = user\n    end\n  end\nend\n```\n\nNhận định nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`session` là đường tạm thời ưu tiên; cookie encrypted user id chỉ dùng khi session không có, và remember token phải khớp digest trước khi gọi `log_in`."
+        },
+        {
+          "id": "b",
+          "text": "`cookies.encrypted[:user_id]` đủ để login vĩnh viễn; `remember_token` chỉ dùng để hiển thị checkbox đã chọn."
+        },
+        {
+          "id": "c",
+          "text": "`@current_user ||=` lưu user qua nhiều request, nên không cần session hoặc cookie nữa."
+        },
+        {
+          "id": "d",
+          "text": "Nếu session tồn tại nhưng user bị xóa, Rails tự động chuyển sang cookie branch trong cùng request."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm memoization request-local với persistence và nhầm encrypted user id với authentication đầy đủ. Cookie user id chỉ định danh, remember token mới chứng minh persistent session còn hợp lệ thông qua digest. Tệp liên quan: `app/helpers/sessions_helper.rb`. Bug thực tế là impersonation nếu chỉ tin user_id cookie, hoặc login mất sau restart nếu không set cookies. `SessionsHelperTest` bắt cookie branch và digest sai."
+    },
+    {
+      "id": "q023",
+      "type": "single_choice",
+      "title": "[D4] flash.now, render và redirect_to",
+      "question": "Tình huống: invalid login dùng `flash[:danger]` rồi `render 'new'`, sau đó user bấm Home vẫn thấy lỗi login. Cách sửa nào đúng nhất về cơ chế Rails?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Dùng `flash.now[:danger]` cho nhánh `render`, vì message chỉ nên sống trong response hiện tại; `flash` thường dành cho request sau redirect."
+        },
+        {
+          "id": "b",
+          "text": "Đổi `render 'new'` thành `redirect_to login_url` để giữ `@user.errors` và form state."
+        },
+        {
+          "id": "c",
+          "text": "Dùng `flash.keep` để Rails tự xóa message sau khi user đổi trang."
+        },
+        {
+          "id": "d",
+          "text": "Xóa `flash` trong layout, vì lỗi persistence là do `yield` render quá nhiều lần."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm lifecycle của `render` và `redirect_to`. `render` trả response trong cùng request; `flash.now` phù hợp. `redirect_to` tạo request mới nên dùng `flash` thường. Tệp liên quan: `SessionsController#create`, layout flash loop. Bug thực tế là thông báo lỗi dai sang trang sau. Integration test login invalid trong `users_login_test.rb` kiểm tra `get root_path` rồi `assert flash.empty?`."
+    },
+    {
+      "id": "q024",
+      "type": "single_choice",
+      "title": "[D5] store_location chỉ lưu GET",
+      "question": "Đọc helper:\n\n```ruby\ndef store_location\n  session[:forwarding_url] = request.original_url if request.get?\nend\n```\n\nVì sao điều kiện `request.get?` là chi tiết quan trọng trong friendly forwarding?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Chỉ lưu GET để sau login điều hướng tới trang an toàn; không lưu POST/PATCH/DELETE nhằm tránh replay request thay đổi trạng thái."
+        },
+        {
+          "id": "b",
+          "text": "Rails session không thể lưu URL của POST/PATCH/DELETE nên điều kiện này chỉ tránh exception."
+        },
+        {
+          "id": "c",
+          "text": "`request.original_url` chỉ có giá trị với GET, các method khác luôn trả nil."
+        },
+        {
+          "id": "d",
+          "text": "Điều kiện này giúp route helper chuyển `_path` thành `_url` trong mailer."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ friendly forwarding chỉ là nhớ URL bất kỳ. GET thường idempotent và phù hợp redirect sau login; lưu PATCH/DELETE có thể dẫn tới replay action hoặc UX sai. Tệp liên quan: `SessionsHelper#store_location`, `redirect_back_or`, `UsersController#logged_in_user`. Bug thực tế là sau login tự gửi lại request cập nhật/xóa. Integration test successful edit with friendly forwarding bắt hành vi đúng."
+    },
+    {
+      "id": "q025",
+      "type": "single_choice",
+      "title": "[D6] cookies.permanent và cookies.encrypted",
+      "question": "Tình huống: một bạn đổi remember-me thành:\n\n```ruby\ncookies.permanent[:user_id] = user.id\ncookies.permanent[:remember_token] = user.remember_token\n```\n\nthay vì mã hiện tại dùng `cookies.permanent.encrypted[:user_id]`. Bẫy nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Không encrypted user id làm lộ và dễ bị sửa định danh; dù vẫn cần token, thiết kế hiện tại giảm rủi ro bằng cách mã hóa id và xác thực token bằng digest."
+        },
+        {
+          "id": "b",
+          "text": "Nếu user id không encrypted, Rails sẽ không gửi cookie lên server ở request sau."
+        },
+        {
+          "id": "c",
+          "text": "`cookies.permanent` tự động mã hóa mọi key, nên `.encrypted` chỉ làm cookie hết hạn nhanh hơn."
+        },
+        {
+          "id": "d",
+          "text": "Chỉ cần encrypted user id là đủ; có thể bỏ `remember_token` vì id đã bí mật."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là xem encryption và authentication là một. `cookies.encrypted[:user_id]` bảo vệ tính bí mật/toàn vẹn của id tốt hơn cookie thường; nhưng remember token vẫn cần để xác thực persistent session với `remember_digest`. Tệp liên quan: `SessionsHelper#remember` và `#current_user`. Bug thực tế là cookie tampering hoặc persistent login không an toàn. Helper tests về current_user từ cookie bắt sai digest."
+    },
+    {
+      "id": "q026",
+      "type": "single_choice",
+      "title": "[E1] provide, yield và content_for trong layout",
+      "question": "Đọc layout và view:\n\n```slim\n/ app/views/layouts/application.html.slim\ntitle = full_title(yield(:title))\n\n/ app/views/users/edit.html.slim\n- provide(:title, 'Edit user')\n```\n\nCơ chế nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`provide` đặt content cho key `:title` trong view context; layout đọc bằng `yield(:title)` rồi truyền vào helper `full_title`."
+        },
+        {
+          "id": "b",
+          "text": "`provide` tạo instance variable `@title` trong controller, nên layout đọc được qua `yield`."
+        },
+        {
+          "id": "c",
+          "text": "`yield(:title)` gọi Ruby block của action controller, không liên quan đến view content."
+        },
+        {
+          "id": "d",
+          "text": "`full_title` tự tìm file view hiện tại để lấy tiêu đề, nên `provide` chỉ là comment."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm `provide` với instance variable hoặc Ruby block thường. Đây là Action View content slot, tương tự `content_for`. Tệp liên quan: `app/views/layouts/application.html.slim`, static/user views, `ApplicationHelper#full_title`. Bug thực tế là title rỗng hoặc sai nếu quên `provide`. Controller/static page tests và layout integration tests với `assert_select 'title'` bắt lỗi."
+    },
+    {
+      "id": "q027",
+      "type": "single_choice",
+      "title": "[E2] form_with model vs url/scope",
+      "question": "So sánh hai form:\n\n```slim\n= form_with(model: @user, local: true) do |f|\n\n= form_with(url: login_path, scope: :session, local: true) do |f|\n```\n\nNhận định nào chính xác nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Form model suy luận route và field names từ object; form login không có model nên chỉ định `url` và `scope` để params thành `params[:session][:email]`."
+        },
+        {
+          "id": "b",
+          "text": "Hai form luôn tạo params cùng key `params[:user]`; khác biệt chỉ nằm ở CSS class."
+        },
+        {
+          "id": "c",
+          "text": "`scope: :session` tạo database table sessions nếu table chưa tồn tại."
+        },
+        {
+          "id": "d",
+          "text": "`form_with(model: @user)` không chạy CSRF token, còn `form_with(url:)` mới chạy CSRF token."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nghĩ mọi `form_with` tạo cùng params shape. Signup/edit user dùng model object nên Rails suy luận RESTful path và field names `user[...]`; login là session không có model Active Record nên route/custom scope rõ ràng. Tệp liên quan: `users/_form.html.slim`, `sessions/new.html.slim`, `SessionsController#create`. Bug thực tế là controller đọc sai `params[:session]` hoặc `params[:user]`. Integration login/signup tests bắt lỗi."
+    },
+    {
+      "id": "q028",
+      "type": "single_choice",
+      "title": "[E3] *_path và *_url trong mailer",
+      "question": "Tình huống: activation email dùng:\n\n```slim\n= link_to 'Activate', edit_account_activation_url(@user.activation_token, email: @user.email)\n```\n\nMột bạn đổi thành `edit_account_activation_path(...)` vì view web thường dùng `_path`. Vì sao đây là lỗi tinh tế?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Email cần absolute URL có host để người nhận mở từ ngoài app; `_path` chỉ tạo đường dẫn tương đối và có thể không dùng được trong email client."
+        },
+        {
+          "id": "b",
+          "text": "`_url` chỉ dùng trong test, còn production mailer bắt buộc dùng `_path` để tránh lộ domain."
+        },
+        {
+          "id": "c",
+          "text": "`_path` tự thêm host nếu được gọi trong mailer, nên hai helper tương đương."
+        },
+        {
+          "id": "d",
+          "text": "`_url` bỏ qua route params `email`, còn `_path` mới giữ query string."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là bê thói quen view web sang mailer. Trong web request, browser đã có host hiện tại nên `_path` đủ. Email rời khỏi request context nên cần absolute URL, đồng thời cần cấu hình host/default_url_options. Tệp liên quan: `app/views/user_mailer/account_activation.html.slim`, password reset mailer views. Bug thực tế là link email không mở đúng domain. Mailer test kiểm tra token và escaped email, còn production config/log bắt lỗi host."
+    },
+    {
+      "id": "q029",
+      "type": "single_choice",
+      "title": "[E4] render partial collection và local variable",
+      "question": "Đọc view:\n\n```slim\nol.microposts\n  = render @microposts\n```\n\nvà partial:\n\n```slim\nli id=\"micropost-#{micropost.id}\"\n  = micropost.content\n```\n\nCơ chế nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Rails collection rendering suy luận partial `_micropost` và tạo local variable `micropost` cho từng phần tử, không phải instance variable `@micropost`."
+        },
+        {
+          "id": "b",
+          "text": "`render @microposts` truyền cả collection vào một local variable tên `microposts`, nên partial phải dùng `microposts.each`."
+        },
+        {
+          "id": "c",
+          "text": "Partial luôn dùng instance variable từ controller; local variable trong partial không tồn tại."
+        },
+        {
+          "id": "d",
+          "text": "Rails chỉ suy luận partial collection nếu model có `default_scope`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm local variable do collection rendering tạo với instance variable controller. `render @microposts` dùng tên model để tìm `microposts/_micropost` và mỗi item có local `micropost`. Tệp liên quan: `users/show.html.slim`, `microposts/_micropost.html.slim`, `shared/_feed.html.slim`. Bug thực tế là `undefined local variable` hoặc render sai collection. Integration profile/feed tests bắt lỗi."
+    },
+    {
+      "id": "q030",
+      "type": "single_choice",
+      "title": "[E5] Action View helpers, asset pipeline và Webpacker",
+      "question": "Tình huống: layout có:\n\n```slim\n= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload'\n= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload'\n```\n\nCách hiểu nào chính xác nhất trong dự án Rails 6 này?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`stylesheet_link_tag` trỏ asset pipeline stylesheet, còn `javascript_pack_tag` trỏ Webpacker pack; cả hai là Action View helpers, không phải route helpers."
+        },
+        {
+          "id": "b",
+          "text": "Hai helper đều tạo route controller action để browser request CSS/JS qua `StaticPagesController`."
+        },
+        {
+          "id": "c",
+          "text": "`javascript_pack_tag` chỉ dùng trong test, production tự bỏ qua pack nếu `stylesheet_link_tag` đã tồn tại."
+        },
+        {
+          "id": "d",
+          "text": "Các helper này tự import mọi file trong `app/views`, nên partial JavaScript không cần render."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là gom mọi helper sinh URL thành route helper. Đây là asset helpers của Action View: CSS từ asset pipeline/Sprockets, JS pack từ Webpacker trong Rails 6 app này. Tệp liên quan: `app/views/layouts/application.html.slim`, `app/assets/stylesheets/application.css`, `app/javascript/packs/application.js`. Bug thực tế là production asset missing nếu cấu hình compile/pack sai. Deployment test/log hoặc asset precompile bắt lỗi."
+    },
+    {
+      "id": "q031",
+      "type": "single_choice",
+      "title": "[F1] has_secure_password, password_digest và authenticate",
+      "question": "Đọc model:\n\n```ruby\nhas_secure_password\nvalidates :password, presence: true, length: { minimum: 6 }, allow_nil: true\n```\n\nNhận định nào đúng nhất về cơ chế do Rails/BCrypt cung cấp?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`has_secure_password` thêm virtual attributes `password`, `password_confirmation`, lưu hash vào `password_digest` và thêm `authenticate` để so password nhập với digest."
+        },
+        {
+          "id": "b",
+          "text": "`has_secure_password` lưu password gốc vào `password_digest`, còn BCrypt chỉ dùng khi gửi email reset."
+        },
+        {
+          "id": "c",
+          "text": "`authenticate` trả về true/false thuần túy, không bao giờ trả về user object khi đúng."
+        },
+        {
+          "id": "d",
+          "text": "`allow_nil: true` cho phép tạo user mới không cần password, miễn là có email hợp lệ."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm digest với password gốc và hiểu sai `allow_nil`. `has_secure_password` dựa vào cột `password_digest` và gem `bcrypt`; `authenticate` thường trả user object nếu đúng, false nếu sai. `allow_nil` hỗ trợ edit profile không đổi password, nhưng tạo user vẫn cần password nhờ secure password validation. Tệp liên quan: `app/models/user.rb`. Bug thực tế là lưu raw password hoặc reject edit profile vì password rỗng. Model/integration edit tests bắt lỗi."
+    },
+    {
+      "id": "q032",
+      "type": "single_choice",
+      "title": "[F2] authenticated? tổng quát cho nhiều digest",
+      "question": "Tình huống: sau Chapter 11, method được tổng quát hóa:\n\n```ruby\ndef authenticated?(attribute, token)\n  digest = send(\"#{attribute}_digest\")\n  return false if digest.nil?\n  BCrypt::Password.new(digest).is_password?(token)\nend\n```\n\nCách gọi nào thể hiện đúng cơ chế và rủi ro?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`authenticated?(:remember, token)` đọc `remember_digest`; `authenticated?(:activation, token)` đọc `activation_digest`; `attribute` không nên lấy tùy tiện từ params."
+        },
+        {
+          "id": "b",
+          "text": "`authenticated?(:remember_digest, token)` là đúng hơn vì method cần tên cột đầy đủ."
+        },
+        {
+          "id": "c",
+          "text": "`send` giải mã digest thành token gốc rồi so sánh chuỗi thường."
+        },
+        {
+          "id": "d",
+          "text": "Nếu digest nil, method nên trả true để user có thể login lại và tạo digest mới."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm argument `attribute` với tên cột đầy đủ và quên rủi ro dynamic dispatch. Method tự thêm `_digest`, dùng BCrypt one-way để kiểm tra token, không giải mã digest. Tệp liên quan: `app/models/user.rb`, `SessionsHelper`, activation/reset controllers. Bug thực tế là gọi sai tên làm tìm cột không tồn tại, hoặc nil digest gây exception nếu thiếu guard. Test nil digest và activation/reset integration bắt lỗi."
+    },
+    {
+      "id": "q033",
+      "type": "single_choice",
+      "title": "[F3] Authentication khác authorization trong cùng request",
+      "question": "Đọc hai callback:\n\n```ruby\nbefore_action :logged_in_user, only: [:edit, :update]\nbefore_action :correct_user,   only: [:edit, :update]\n```\n\nBẫy bảo mật nào chính xác nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`logged_in_user` chỉ xác nhận authentication; `correct_user` mới kiểm tra ownership/authorization của record từ `params[:id]`."
+        },
+        {
+          "id": "b",
+          "text": "`correct_user` chỉ tối ưu query vì `logged_in_user` đã đủ để bảo vệ mọi profile."
+        },
+        {
+          "id": "c",
+          "text": "`logged_in_user` kiểm tra admin, còn `correct_user` kiểm tra password đúng hay sai."
+        },
+        {
+          "id": "d",
+          "text": "Hai callback giống nhau, nhưng Rails yêu cầu khai báo cả hai để route `edit` hoạt động."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là đồng nhất đăng nhập với quyền sở hữu tài nguyên. User đã login vẫn có thể sửa URL sang `/users/:id/edit` của người khác nếu không có `correct_user`. Tệp liên quan: `UsersController`. Bug thực tế là sửa profile người khác. Integration tests `should redirect edit/update when logged in as wrong user` bắt lỗi."
+    },
+    {
+      "id": "q034",
+      "type": "single_choice",
+      "title": "[F4] Token raw, digest và email link",
+      "question": "Tình huống: một bạn muốn lưu `activation_token` và `reset_token` trực tiếp vào bảng users để debug email dễ hơn. Vì sao thiết kế tutorial dùng `activation_digest` và `reset_digest`?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Raw token là bearer secret gửi cho user qua email; database chỉ nên giữ digest để nếu DB lộ thì attacker không dùng ngay token để activate/reset."
+        },
+        {
+          "id": "b",
+          "text": "Rails không cho migration tạo cột chứa token dạng string, nên bắt buộc phải dùng digest."
+        },
+        {
+          "id": "c",
+          "text": "Digest giúp mailer không cần route helper `_url` khi tạo link."
+        },
+        {
+          "id": "d",
+          "text": "Token raw chỉ nguy hiểm với remember me, còn activation/reset token có thể lưu plain text vì chúng nằm trong email."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là coi token email ít nhạy cảm hơn token cookie. Activation/reset token đều là bearer secret trong thời gian còn hiệu lực; DB chỉ lưu digest và dùng `authenticated?` kiểm tra. Tệp liên quan: `User#create_activation_digest`, `create_reset_digest`, mailer views. Bug thực tế là DB leak dẫn đến chiếm tài khoản. Mailer/integration tests kiểm tra token trong email và digest behavior."
+    },
+    {
+      "id": "q035",
+      "type": "single_choice",
+      "title": "[G1] ActiveSupport::TestCase và fixtures",
+      "question": "Đọc `test/test_helper.rb`:\n\n```ruby\nclass ActiveSupport::TestCase\n  fixtures :all\n  def log_in_as(user)\n    session[:user_id] = user.id\n  end\nend\n```\n\nVì sao helper này khác với `ActionDispatch::IntegrationTest#log_in_as` trong cùng file?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Trong model/controller-style test có thể set session trực tiếp; integration test phải mô phỏng request thật bằng `post login_path` để đi qua route/controller/cookies."
+        },
+        {
+          "id": "b",
+          "text": "Hai helper tương đương hoàn toàn; integration test dùng `post` chỉ để chậm hơn giống browser."
+        },
+        {
+          "id": "c",
+          "text": "Fixtures chỉ load trong integration test, nên model test helper không truy cập được `users(:michael)`."
+        },
+        {
+          "id": "d",
+          "text": "`session[:user_id]` trong test helper tự tạo remember token, còn integration helper chỉ tạo flash."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm tầng test. `ActiveSupport::TestCase` cung cấp fixtures cho model/helper tests; integration test mô phỏng full stack request nên login bằng POST để exercise controller/session/cookie path. Tệp liên quan: `test/test_helper.rb`. Bug thực tế là test pass giả nếu bypass controller logic cần kiểm tra. Integration tests login/remember me bắt flow thực."
+    },
+    {
+      "id": "q036",
+      "type": "single_choice",
+      "title": "[G2] assert_difference và thời điểm block",
+      "question": "Tình huống test:\n\n```ruby\nassert_difference 'User.count', 1 do\n  post users_path, params: { user: valid_params }\nend\n```\n\nNếu đặt `post users_path` trước block rồi mới gọi `assert_difference`, vì sao test mất ý nghĩa?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`assert_difference` đo giá trị trước và sau khi thực thi block; request tạo user phải nằm trong block thì test mới bắt đúng side effect."
+        },
+        {
+          "id": "b",
+          "text": "`assert_difference` chỉ kiểm tra response body, nên vị trí request không quan trọng."
+        },
+        {
+          "id": "c",
+          "text": "`assert_difference` tự chạy lại request gần nhất nếu block trống."
+        },
+        {
+          "id": "d",
+          "text": "Đặt request trước block vẫn đúng nếu controller redirect, vì redirect làm database update chậm hơn."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là quên block trong Minitest chính là đoạn code được đo. `assert_difference` snapshot trước block, chạy block, rồi snapshot sau block. Tệp liên quan: signup tests, users index destroy test, micropost interface tests. Bug thực tế là test không thật sự bảo vệ create/destroy side effect. Regression tests phải đặt request thay đổi dữ liệu trong block."
+    },
+    {
+      "id": "q037",
+      "type": "single_choice",
+      "title": "[G3] assert_redirected_to, follow_redirect! và assert_template",
+      "question": "Đọc flow test:\n\n```ruby\npost login_path, params: { session: { email: @user.email, password: 'password' } }\nassert_redirected_to @user\nfollow_redirect!\nassert_template 'users/show'\n```\n\nNhận định nào đúng nhất?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "`assert_redirected_to` kiểm tra response 3xx ban đầu; `follow_redirect!` gửi request tiếp theo; `assert_template` sau đó kiểm tra template của response cuối."
+        },
+        {
+          "id": "b",
+          "text": "`assert_redirected_to` tự động follow redirect, nên `follow_redirect!` chỉ reset flash."
+        },
+        {
+          "id": "c",
+          "text": "`assert_template` luôn kiểm tra template của request trước redirect, dù đã gọi `follow_redirect!`."
+        },
+        {
+          "id": "d",
+          "text": "Nếu redirect dùng `_url`, `follow_redirect!` không hoạt động; test chỉ dùng được với `_path`."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm redirect response với rendered response. Sau POST login thành công, server trả redirect, chưa render profile. `follow_redirect!` mới mô phỏng browser request đến URL đích. Tệp liên quan: `users_login_test.rb`, `users_signup_test.rb`. Bug thực tế là assert nhầm template trước khi follow redirect hoặc không kiểm tra trang cuối. Integration tests bắt flow thật."
+    },
+    {
+      "id": "q038",
+      "type": "single_choice",
+      "title": "[G4] assert_select kiểm tra HTML chứ không kiểm tra quyền",
+      "question": "Tình huống test non-admin:\n\n```ruby\nget users_path\nassert_select 'a', text: 'delete', count: 0\n```\n\nNhận định nào chính xác nhất về giới hạn của test này?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Nó chỉ kiểm tra UI không render delete link; vẫn cần test direct `delete user_path(...)` với `assert_no_difference` để kiểm tra backend authorization."
+        },
+        {
+          "id": "b",
+          "text": "Nếu HTML không có link delete, Rails sẽ tự chặn mọi DELETE request đến route đó."
+        },
+        {
+          "id": "c",
+          "text": "`assert_select` kiểm tra cả controller callback, nên không cần controller test cho non-admin destroy."
+        },
+        {
+          "id": "d",
+          "text": "`assert_select` chỉ hoạt động với static pages, không dùng được với users index."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm rendered UI với security boundary. `assert_select` rất tốt để kiểm tra HTML, nhưng attacker có thể gửi DELETE trực tiếp. Tệp liên quan: `users_index_test.rb`, `users_controller_test.rb`, `UsersController#admin_user`. Bug thực tế là non-admin không thấy nút nhưng vẫn xóa được qua curl. Cần cả UI test và authorization request test."
+    },
+    {
+      "id": "q039",
+      "type": "single_choice",
+      "title": "[H1] Case study: Ajax follow database đúng nhưng DOM sai",
+      "question": "Tình huống tổng hợp: test `post relationships_path, xhr: true, params: { followed_id: @other.id }` làm `@user.following.count` tăng, nhưng browser không đổi nút Follow thành Unfollow. Chuỗi kiểm tra nào đúng nhất qua route, controller, view và test?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Kiểm tra form `local: false`, route `resources :relationships`, `RelationshipsController#respond_to format.js`, file `create.js.erb`, và DOM id `#follow_form`/`#followers` khớp partial."
+        },
+        {
+          "id": "b",
+          "text": "Chỉ kiểm tra `Relationship` model validation, vì nếu database tăng thì JavaScript chắc chắn đã render."
+        },
+        {
+          "id": "c",
+          "text": "Đổi route POST thành GET để browser dễ cache response Ajax và tự cập nhật DOM."
+        },
+        {
+          "id": "d",
+          "text": "Bỏ `format.html` để Rails bắt buộc mọi request follow đều là Ajax, từ đó tránh sai DOM."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là đồng nhất database state với UI state. Ajax có hai phần: server thay đổi relationship và response JS cập nhật DOM. Tệp liên quan: `_follow.html.slim`, `_unfollow.html.slim`, `relationships_controller.rb`, `relationships/create.js.erb`, `destroy.js.erb`, `following_test.rb`. Bug thực tế là count trong DB đúng nhưng HTML không đổi do selector sai hoặc thiếu `format.js`. Test XHR bắt database; system/browser test hoặc kiểm tra JS response bắt DOM."
+    },
+    {
+      "id": "q040",
+      "type": "single_choice",
+      "title": "[H2] Case study: Feed đúng về render nhưng sai về mô hình dữ liệu",
+      "question": "Tình huống tổng hợp: home page render nhiều micropost và `assert_select 'ol.microposts'` pass, nhưng feed có cả post của user chưa follow. Thiết kế kiểm tra nào bắt đúng bug thay vì chỉ bắt HTML tồn tại?",
+      "points": 10,
+      "options": [
+        {
+          "id": "a",
+          "text": "Model test `User#feed` phải assert include post của self/followed và assert_not include post của unfollowed; integration home chỉ xác nhận feed đã render đúng nội dung đã chọn."
+        },
+        {
+          "id": "b",
+          "text": "Chỉ cần `assert_select 'ol.microposts'`, vì nếu danh sách tồn tại thì query feed đã đúng."
+        },
+        {
+          "id": "c",
+          "text": "Chỉ test `Relationship.count`, vì số relationship quyết định trực tiếp mọi micropost được render."
+        },
+        {
+          "id": "d",
+          "text": "Đưa logic lọc feed vào partial `_feed.html.slim` để test view dễ kiểm tra hơn model."
+        }
+      ],
+      "correct_answer": "a",
+      "explanation": "Đáp án đúng là A. Bẫy là nhầm render thành công với business correctness. Feed query thuộc model/query layer (`User#feed`), không nên lọc bằng view. Tệp liên quan: `app/models/user.rb`, `static_pages_controller.rb`, `shared/_feed.html.slim`, `test/models/user_test.rb`, `following_test.rb`. Bug thực tế là người dùng thấy nội dung không thuộc follow graph. Model test inclusion/exclusion cùng integration test home feed sẽ bắt bug qua nhiều tầng."
+    }
+  ]
+}

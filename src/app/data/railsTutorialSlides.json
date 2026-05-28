@@ -1,0 +1,504 @@
+{
+  "course_id": "rails_tutorial_slide_learning_01",
+  "title": "Ruby on Rails Tutorial Study Slides",
+  "description": "Chapter-by-chapter code slides, method explanations, important Rails ideas, and an appendix for quick lookup.",
+  "chapters": [
+    {
+      "id": "chapter_01",
+      "chapter": 1,
+      "title": "From zero to deploy",
+      "theme": "Rails app lifecycle, Bundler, server, MVC, Git, deployment",
+      "slides": [
+        {
+          "id": "c01_slide_01",
+          "title": "Rails project boot sequence",
+          "code": "gem install rails -v 6.0.3\nrails _6.0.3_ new hello_app\ncd hello_app\nbundle install\nrails server",
+          "language": "bash",
+          "explanation": "A Rails app starts as a generated directory structure. Bundler resolves Ruby gem dependencies, then `rails server` boots the Rack app so browser requests can reach Rails.",
+          "methods": [
+            { "name": "rails new", "explanation": "Generates a Rails application skeleton with app, config, db, test, and Gemfile directories." },
+            { "name": "bundle install", "explanation": "Installs exact gem versions needed by the application." },
+            { "name": "rails server", "explanation": "Starts the local web server for development." }
+          ],
+          "important": [
+            "Understand Rails as a request/response web framework.",
+            "Gemfile changes usually require `bundle install`.",
+            "Git should capture small working checkpoints before deployment."
+          ],
+          "output": "A local development server responds at a localhost URL and renders the default Rails page or custom app response."
+        }
+      ]
+    },
+    {
+      "id": "chapter_02",
+      "chapter": 2,
+      "title": "A toy app",
+      "theme": "Scaffolded resources, REST, MVC, generated Users and Microposts",
+      "slides": [
+        {
+          "id": "c02_slide_01",
+          "title": "Resource scaffold and REST routes",
+          "code": "rails generate scaffold User name:string email:string\nrails generate scaffold Micropost content:text user_id:integer\nrails db:migrate\nresources :users\nresources :microposts",
+          "language": "ruby",
+          "explanation": "Scaffolding creates a quick CRUD resource across model, view, controller, routes, and migration. It is useful for seeing Rails conventions, but real apps usually replace scaffolded code with custom flows.",
+          "methods": [
+            { "name": "resources", "explanation": "Creates the standard RESTful routes: index, show, new, create, edit, update, destroy." },
+            { "name": "db:migrate", "explanation": "Applies pending database schema changes from migration files." },
+            { "name": "has_many / belongs_to", "explanation": "Express model relationships and add association helper methods." }
+          ],
+          "important": [
+            "REST routes are central to Rails controller design.",
+            "Generated scaffolds demonstrate conventions but are not polished production UX.",
+            "Associations are more expressive than raw foreign-key handling."
+          ],
+          "output": "`/users` and `/microposts` expose CRUD screens backed by database tables."
+        }
+      ]
+    },
+    {
+      "id": "chapter_03",
+      "chapter": 3,
+      "title": "Mostly static pages",
+      "theme": "Controllers, views, routes, first tests, red/green/refactor",
+      "slides": [
+        {
+          "id": "c03_slide_01",
+          "title": "Static controller and route-driven pages",
+          "code": "rails generate controller StaticPages home help\n\n# config/routes.rb\nroot 'static_pages#home'\nget '/help', to: 'static_pages#help'",
+          "language": "ruby",
+          "explanation": "Static pages are still routed through controllers. The route decides which controller action runs, then Rails renders the matching view template unless told otherwise.",
+          "methods": [
+            { "name": "root", "explanation": "Defines the homepage route." },
+            { "name": "get", "explanation": "Maps a GET request path to a controller action." },
+            { "name": "assert_select", "explanation": "Checks rendered HTML in Rails integration/controller tests." }
+          ],
+          "important": [
+            "Testing page titles catches routing and template regressions.",
+            "Rails defaults to implicit rendering when action and template names match.",
+            "Red/green/refactor gives a disciplined workflow for UI behavior."
+          ],
+          "output": "Visiting `/`, `/help`, and other static paths renders corresponding templates with testable HTML."
+        }
+      ]
+    },
+    {
+      "id": "chapter_04",
+      "chapter": 4,
+      "title": "Rails-flavored Ruby",
+      "theme": "Ruby strings, arrays, hashes, blocks, classes, helpers",
+      "slides": [
+        {
+          "id": "c04_slide_01",
+          "title": "Helpers are Ruby methods used by views",
+          "code": "module ApplicationHelper\n  def full_title(page_title = '')\n    base_title = 'Ruby on Rails Tutorial Sample App'\n    if page_title.empty?\n      base_title\n    else\n      \"#{page_title} | #{base_title}\"\n    end\n  end\nend",
+          "language": "ruby",
+          "explanation": "Rails helpers are ordinary Ruby methods made available to views. They keep templates focused on presentation while moving reusable formatting logic into Ruby.",
+          "methods": [
+            { "name": "def", "explanation": "Defines a Ruby method." },
+            { "name": "empty?", "explanation": "Predicate method that returns true if a string or collection has no content." },
+            { "name": "interpolation", "explanation": "`#{...}` inserts Ruby expression results into a string." }
+          ],
+          "important": [
+            "Rails code reads naturally because Ruby allows expressive method names.",
+            "Blocks power many Rails APIs.",
+            "Symbols and hashes appear constantly in routes, validations, and options."
+          ],
+          "output": "`full_title('Help')` returns `Help | Ruby on Rails Tutorial Sample App`."
+        }
+      ]
+    },
+    {
+      "id": "chapter_05",
+      "chapter": 5,
+      "title": "Filling in the layout",
+      "theme": "Layout, partials, asset pipeline, named routes, signup URL",
+      "slides": [
+        {
+          "id": "c05_slide_01",
+          "title": "Named routes make links resilient",
+          "code": "# config/routes.rb\nroot 'static_pages#home'\nget '/help',    to: 'static_pages#help'\nget '/signup',  to: 'users#new'\n\n# app/views/layouts/application.html.erb\n<%= link_to 'Home', root_path %>\n<%= link_to 'Sign up', signup_path %>",
+          "language": "erb",
+          "explanation": "Named route helpers decouple view links from raw URL strings. If a path changes in routes, templates can keep using semantic helpers.",
+          "methods": [
+            { "name": "link_to", "explanation": "Generates an HTML anchor tag." },
+            { "name": "root_path", "explanation": "URL helper generated by the `root` route." },
+            { "name": "render", "explanation": "Renders a partial or template into the current view." }
+          ],
+          "important": [
+            "Partials reduce duplicated header/footer/link markup.",
+            "The asset pipeline organizes stylesheets, JavaScript, and images.",
+            "Named routes are safer than hard-coded URL strings."
+          ],
+          "output": "The layout renders reusable navigation links that point to current route definitions."
+        }
+      ]
+    },
+    {
+      "id": "chapter_06",
+      "chapter": 6,
+      "title": "Modeling users",
+      "theme": "Active Record, migrations, validations, secure password",
+      "slides": [
+        {
+          "id": "c06_slide_01",
+          "title": "User model validations and secure password",
+          "code": "class User < ApplicationRecord\n  before_save { self.email = email.downcase }\n  validates :name, presence: true, length: { maximum: 50 }\n  validates :email, presence: true, uniqueness: true\n  has_secure_password\n  validates :password, presence: true, length: { minimum: 6 }\nend",
+          "language": "ruby",
+          "explanation": "Active Record models combine database persistence with domain rules. Validations prevent bad records, callbacks normalize data, and `has_secure_password` wires password hashing and authentication.",
+          "methods": [
+            { "name": "validates", "explanation": "Declares validation rules checked before saving." },
+            { "name": "before_save", "explanation": "Runs code before a record is persisted." },
+            { "name": "has_secure_password", "explanation": "Adds password digest handling and `authenticate`." }
+          ],
+          "important": [
+            "Database constraints and model validations should complement each other.",
+            "Email uniqueness needs case normalization plus a unique database index.",
+            "Never store raw passwords."
+          ],
+          "output": "Invalid users fail `valid?`; valid users can be saved and later authenticated."
+        }
+      ]
+    },
+    {
+      "id": "chapter_07",
+      "chapter": 7,
+      "title": "Sign up",
+      "theme": "User resource, form_with, strong parameters, flash, signup tests",
+      "slides": [
+        {
+          "id": "c07_slide_01",
+          "title": "Strong parameters protect mass assignment",
+          "code": "class UsersController < ApplicationController\n  def create\n    @user = User.new(user_params)\n    if @user.save\n      flash[:success] = 'Welcome to the Sample App!'\n      redirect_to @user\n    else\n      render 'new'\n    end\n  end\n\n  private\n\n  def user_params\n    params.require(:user).permit(:name, :email, :password, :password_confirmation)\n  end\nend",
+          "language": "ruby",
+          "explanation": "The controller creates a user only from permitted fields. Successful signup redirects and stores a flash message; failed signup renders the form again with validation errors.",
+          "methods": [
+            { "name": "params.require", "explanation": "Requires a top-level parameter key." },
+            { "name": "permit", "explanation": "Allows only listed attributes through mass assignment." },
+            { "name": "flash", "explanation": "Stores a message for the next rendered request or redirect." }
+          ],
+          "important": [
+            "Strong parameters are a core Rails security boundary.",
+            "`render` keeps the same request; `redirect_to` starts a new request.",
+            "Signup tests should cover both invalid and valid submissions."
+          ],
+          "output": "A valid POST creates a user and redirects to `/users/:id`; invalid data re-renders signup."
+        }
+      ]
+    },
+    {
+      "id": "chapter_08",
+      "chapter": 8,
+      "title": "Basic login",
+      "theme": "Sessions, login form, authenticate, current_user, logout",
+      "slides": [
+        {
+          "id": "c08_slide_01",
+          "title": "Session-based login",
+          "code": "module SessionsHelper\n  def log_in(user)\n    session[:user_id] = user.id\n  end\n\n  def current_user\n    @current_user ||= User.find_by(id: session[:user_id])\n  end\n\n  def logged_in?\n    !current_user.nil?\n  end\nend",
+          "language": "ruby",
+          "explanation": "A Rails session stores a signed user id in the browser. `current_user` memoizes the database lookup so repeated calls during one request do not keep querying.",
+          "methods": [
+            { "name": "session", "explanation": "Per-browser signed data suitable for login state." },
+            { "name": "find_by", "explanation": "Returns the first matching record or nil." },
+            { "name": "||=", "explanation": "Memoizes by assigning only when the left side is nil or false." }
+          ],
+          "important": [
+            "Use `flash.now` when rendering a failed login form, not `flash`.",
+            "Login state belongs in sessions, not hidden form fields.",
+            "Logout should delete the session user id."
+          ],
+          "output": "After login, helpers can answer who the current user is and whether layout links should change."
+        }
+      ]
+    },
+    {
+      "id": "chapter_09",
+      "chapter": 9,
+      "title": "Advanced login",
+      "theme": "Remember me, persistent cookies, token digest, subtle login bugs",
+      "slides": [
+        {
+          "id": "c09_slide_01",
+          "title": "Persistent login with remember token",
+          "code": "def remember(user)\n  user.remember\n  cookies.permanent.signed[:user_id] = user.id\n  cookies.permanent[:remember_token] = user.remember_token\nend\n\ndef forget(user)\n  user.forget\n  cookies.delete(:user_id)\n  cookies.delete(:remember_token)\nend",
+          "language": "ruby",
+          "explanation": "Remember-me login uses persistent cookies plus a server-side token digest. The raw token goes to the browser; the digest stays in the database for comparison.",
+          "methods": [
+            { "name": "cookies.permanent", "explanation": "Stores a browser cookie with a long expiration." },
+            { "name": "signed", "explanation": "Prevents client-side tampering with cookie values." },
+            { "name": "authenticated?", "explanation": "Compares a token with a stored digest." }
+          ],
+          "important": [
+            "Treat remember tokens like passwords.",
+            "Clearing cookies and database digest must stay in sync.",
+            "Guard against nil digest bugs when users log out in multiple browsers."
+          ],
+          "output": "The user remains logged in across browser restarts until `forget` clears the persistent state."
+        }
+      ]
+    },
+    {
+      "id": "chapter_10",
+      "chapter": 10,
+      "title": "Updating, showing, and deleting users",
+      "theme": "Edit/update, authorization, before_action, friendly forwarding, pagination, admin destroy",
+      "slides": [
+        {
+          "id": "c10_slide_01",
+          "title": "Authorization with before_action",
+          "code": "class UsersController < ApplicationController\n  before_action :logged_in_user, only: [:index, :edit, :update, :destroy]\n  before_action :correct_user,   only: [:edit, :update]\n  before_action :admin_user,     only: :destroy\n\n  def correct_user\n    @user = User.find(params[:id])\n    redirect_to(root_url) unless current_user?(@user)\n  end\nend",
+          "language": "ruby",
+          "explanation": "`before_action` centralizes access control so protected actions cannot run until required checks pass. Authorization is separate from authentication: logged in is not the same as allowed.",
+          "methods": [
+            { "name": "before_action", "explanation": "Runs filters before selected controller actions." },
+            { "name": "current_user?", "explanation": "Checks whether a given user equals the logged-in user." },
+            { "name": "redirect_to", "explanation": "Stops normal rendering and sends the browser to another URL." }
+          ],
+          "important": [
+            "Every write action needs authorization checks.",
+            "Friendly forwarding stores the intended URL before login.",
+            "Admin-only delete behavior should be tested."
+          ],
+          "output": "Wrong users are redirected away; admins can delete users; normal users cannot."
+        }
+      ]
+    },
+    {
+      "id": "chapter_11",
+      "chapter": 11,
+      "title": "Account activation",
+      "theme": "Activation tokens, mailers, account activation resource, authenticated? generalization",
+      "slides": [
+        {
+          "id": "c11_slide_01",
+          "title": "Token-based account activation",
+          "code": "class User < ApplicationRecord\n  attr_accessor :activation_token\n  before_create :create_activation_digest\n\n  def create_activation_digest\n    self.activation_token = User.new_token\n    self.activation_digest = User.digest(activation_token)\n  end\nend",
+          "language": "ruby",
+          "explanation": "Activation uses a temporary token emailed to the user and a digest stored in the database. The app verifies the token before marking the account activated.",
+          "methods": [
+            { "name": "attr_accessor", "explanation": "Creates a virtual attribute not persisted directly to the database." },
+            { "name": "before_create", "explanation": "Runs only before a new record is first saved." },
+            { "name": "deliver_now", "explanation": "Sends an email immediately through Action Mailer." }
+          ],
+          "important": [
+            "Email links should carry a token, not a password.",
+            "Store digests rather than raw tokens.",
+            "Only activated users should be allowed to log in."
+          ],
+          "output": "A signup creates an inactive user, sends email, and activation flips the account to active."
+        }
+      ]
+    },
+    {
+      "id": "chapter_12",
+      "chapter": 12,
+      "title": "Password reset",
+      "theme": "Reset tokens, reset emails, expiration, update password flow",
+      "slides": [
+        {
+          "id": "c12_slide_01",
+          "title": "Password reset expiration",
+          "code": "def create_reset_digest\n  self.reset_token = User.new_token\n  update_columns(reset_digest: User.digest(reset_token), reset_sent_at: Time.zone.now)\nend\n\ndef password_reset_expired?\n  reset_sent_at < 2.hours.ago\nend",
+          "language": "ruby",
+          "explanation": "Password reset works like account activation but adds a time window. Expiring old reset links limits damage from leaked emails or stale tokens.",
+          "methods": [
+            { "name": "update_columns", "explanation": "Updates database columns directly, bypassing validations and callbacks." },
+            { "name": "Time.zone.now", "explanation": "Uses Rails time zone awareness instead of system time." },
+            { "name": "2.hours.ago", "explanation": "ActiveSupport time helper for readable duration logic." }
+          ],
+          "important": [
+            "Reset links should expire.",
+            "Blank password updates need special handling.",
+            "Reset tokens should be digested like activation and remember tokens."
+          ],
+          "output": "A valid recent token allows password update; an expired token redirects with an error."
+        }
+      ]
+    },
+    {
+      "id": "chapter_13",
+      "chapter": 13,
+      "title": "User microposts",
+      "theme": "Micropost model, dependent destroy, feed, image upload, validations",
+      "slides": [
+        {
+          "id": "c13_slide_01",
+          "title": "User-owned microposts and feed basics",
+          "code": "class User < ApplicationRecord\n  has_many :microposts, dependent: :destroy\nend\n\nclass Micropost < ApplicationRecord\n  belongs_to :user\n  default_scope -> { order(created_at: :desc) }\n  validates :user_id, presence: true\n  validates :content, presence: true, length: { maximum: 140 }\nend",
+          "language": "ruby",
+          "explanation": "Microposts belong to users, and a user owns many microposts. `dependent: :destroy` prevents orphaned posts, and `default_scope` makes newest posts appear first.",
+          "methods": [
+            { "name": "has_many", "explanation": "Defines one-to-many association methods." },
+            { "name": "belongs_to", "explanation": "Defines the inverse association and foreign-key expectation." },
+            { "name": "default_scope", "explanation": "Adds a default ordering or condition to model queries." }
+          ],
+          "important": [
+            "Always protect user-owned content with access control.",
+            "Dependent destroy is useful but can have performance implications.",
+            "Upload validation should restrict size and content type."
+          ],
+          "output": "`user.microposts` returns that user's posts, ordered newest first."
+        }
+      ]
+    },
+    {
+      "id": "chapter_14",
+      "chapter": 14,
+      "title": "Following users",
+      "theme": "Relationship model, has_many through, member routes, Ajax follow forms, status feed",
+      "slides": [
+        {
+          "id": "c14_slide_01",
+          "title": "Following with has_many through",
+          "code": "class User < ApplicationRecord\n  has_many :active_relationships, class_name: 'Relationship', foreign_key: 'follower_id', dependent: :destroy\n  has_many :passive_relationships, class_name: 'Relationship', foreign_key: 'followed_id', dependent: :destroy\n  has_many :following, through: :active_relationships, source: :followed\n  has_many :followers, through: :passive_relationships, source: :follower\n\n  def follow(other_user)\n    following << other_user\n  end\nend",
+          "language": "ruby",
+          "explanation": "The follow graph is a self-referential relationship between users. Rails needs explicit class names, foreign keys, and source names to understand both sides.",
+          "methods": [
+            { "name": "has_many :through", "explanation": "Builds an association through a join model." },
+            { "name": "class_name", "explanation": "Tells Rails which model class to use when the association name is not enough." },
+            { "name": "source", "explanation": "Identifies the target association on the join model." }
+          ],
+          "important": [
+            "Following/followers is not a simple one-column association.",
+            "Uniqueness indexes prevent duplicate follows.",
+            "Feed queries are where app correctness and database performance meet."
+          ],
+          "output": "`user.following` returns users followed by `user`; `user.followers` returns users following `user`."
+        }
+      ]
+    }
+  ],
+  "appendix": {
+    "title": "Rails method lookup appendix",
+    "description": "Quick reference for method names, sample code, and expected output/behavior.",
+    "groups": [
+      {
+        "id": "routing",
+        "title": "Routing and REST",
+        "module": "ActionDispatch::Routing",
+        "class": "config/routes.rb DSL",
+        "items": [
+          { "name": "root", "code": "root 'static_pages#home'", "explanation": "Defines the application homepage.", "output": "`GET /` dispatches to `StaticPagesController#home`." },
+          { "name": "get", "code": "get '/help', to: 'static_pages#help'", "explanation": "Maps a GET request to a controller action.", "output": "`GET /help` runs `StaticPagesController#help`." },
+          { "name": "post", "code": "post '/login', to: 'sessions#create'", "explanation": "Maps a POST request, commonly used for form submission.", "output": "Login form POST runs `SessionsController#create`." },
+          { "name": "delete", "code": "delete '/logout', to: 'sessions#destroy'", "explanation": "Maps a DELETE request, commonly used for logout and destroy actions.", "output": "Logout link can clear the session." },
+          { "name": "resources", "code": "resources :users", "explanation": "Generates RESTful routes for a resource.", "output": "Creates index/show/new/create/edit/update/destroy routes." },
+          { "name": "member", "code": "resources :users do\n  member do\n    get :following, :followers\n  end\nend", "explanation": "Adds routes that apply to one resource member.", "output": "Creates `/users/:id/following` and `/users/:id/followers`." }
+        ]
+      },
+      {
+        "id": "controller",
+        "title": "Controller flow",
+        "module": "ActionController",
+        "class": "ApplicationController and resource controllers",
+        "items": [
+          { "name": "before_action", "code": "before_action :logged_in_user, only: [:edit, :update]", "explanation": "Runs a filter before selected controller actions.", "output": "Unauthorized users are redirected before action logic executes." },
+          { "name": "params", "code": "params[:id]", "explanation": "Exposes route, query string, and form parameters.", "output": "In `/users/1`, `params[:id]` is `1`." },
+          { "name": "require / permit", "code": "params.require(:user).permit(:name, :email)", "explanation": "Strong Parameters whitelist safe attributes.", "output": "Unpermitted attributes are filtered out." },
+          { "name": "render", "code": "render 'new'", "explanation": "Renders a template in the same request.", "output": "Validation errors remain available in `@user.errors`." },
+          { "name": "redirect_to", "code": "redirect_to @user", "explanation": "Sends the browser to a new URL.", "output": "Browser performs a new request to `/users/:id`." },
+          { "name": "flash", "code": "flash[:success] = 'Welcome!'", "explanation": "Stores a message for the next request.", "output": "Message survives redirect." },
+          { "name": "flash.now", "code": "flash.now[:danger] = 'Invalid login'", "explanation": "Stores a message only for the current render.", "output": "Message does not leak after navigating away." }
+        ]
+      },
+      {
+        "id": "view",
+        "title": "Views and helpers",
+        "module": "ActionView",
+        "class": "ERB templates and helper modules",
+        "items": [
+          { "name": "link_to", "code": "<%= link_to 'Home', root_path %>", "explanation": "Generates an HTML anchor tag.", "output": "`<a href=\"/\">Home</a>`." },
+          { "name": "form_with", "code": "<%= form_with(model: @user, local: true) do |f| %>", "explanation": "Builds a form bound to a model.", "output": "Posts user fields to the correct create/update route." },
+          { "name": "render partial", "code": "<%= render 'layouts/header' %>", "explanation": "Renders a reusable partial template.", "output": "Injects shared markup into the current view." },
+          { "name": "provide / yield", "code": "<% provide(:title, 'Help') %>\n<title><%= yield(:title) %></title>", "explanation": "Passes page-specific content into a layout.", "output": "The layout receives the page title." },
+          { "name": "image_tag", "code": "<%= image_tag 'rails.svg', alt: 'Rails logo' %>", "explanation": "Generates an image tag through the asset pipeline.", "output": "Renders an optimized asset URL." }
+        ]
+      },
+      {
+        "id": "active_record",
+        "title": "Active Record model API",
+        "module": "ActiveRecord",
+        "class": "ApplicationRecord models",
+        "items": [
+          { "name": "validates", "code": "validates :email, presence: true, uniqueness: true", "explanation": "Declares model validation rules.", "output": "`user.valid?` is false when email is blank or duplicated." },
+          { "name": "before_save", "code": "before_save { self.email = email.downcase }", "explanation": "Runs before each save.", "output": "Email is normalized before persistence." },
+          { "name": "before_create", "code": "before_create :create_activation_digest", "explanation": "Runs only before first save.", "output": "Activation token is generated for new users." },
+          { "name": "find", "code": "User.find(params[:id])", "explanation": "Finds by primary key or raises if missing.", "output": "Returns a User or raises `ActiveRecord::RecordNotFound`." },
+          { "name": "find_by", "code": "User.find_by(email: params[:session][:email].downcase)", "explanation": "Finds the first record matching conditions.", "output": "Returns a User or nil." },
+          { "name": "update_columns", "code": "update_columns(reset_digest: digest, reset_sent_at: Time.zone.now)", "explanation": "Updates columns directly without validations/callbacks.", "output": "Token digest and timestamp are persisted immediately." },
+          { "name": "default_scope", "code": "default_scope -> { order(created_at: :desc) }", "explanation": "Applies a default query scope.", "output": "Microposts appear newest first." }
+        ]
+      },
+      {
+        "id": "associations",
+        "title": "Associations",
+        "module": "ActiveRecord::Associations",
+        "class": "User, Micropost, Relationship",
+        "items": [
+          { "name": "has_many", "code": "has_many :microposts, dependent: :destroy", "explanation": "Defines a one-to-many association.", "output": "`user.microposts` returns posts owned by the user." },
+          { "name": "belongs_to", "code": "belongs_to :user", "explanation": "Defines the owning side of an association.", "output": "`micropost.user` returns the author." },
+          { "name": "dependent: :destroy", "code": "has_many :microposts, dependent: :destroy", "explanation": "Destroys associated records when parent is destroyed.", "output": "Deleting a user deletes their microposts." },
+          { "name": "class_name", "code": "has_many :active_relationships, class_name: 'Relationship'", "explanation": "Specifies the model class for a non-standard association name.", "output": "Rails uses Relationship instead of guessing ActiveRelationship." },
+          { "name": "foreign_key", "code": "foreign_key: 'follower_id'", "explanation": "Specifies which column links the association.", "output": "A user can own active relationships through follower_id." },
+          { "name": "source", "code": "has_many :following, through: :active_relationships, source: :followed", "explanation": "Specifies the target association in a through relation.", "output": "`user.following` returns followed users." }
+        ]
+      },
+      {
+        "id": "auth_security",
+        "title": "Authentication and security",
+        "module": "ActionController + ActiveModel::SecurePassword",
+        "class": "SessionsHelper and User",
+        "items": [
+          { "name": "has_secure_password", "code": "has_secure_password", "explanation": "Adds password digest and authenticate behavior.", "output": "`user.authenticate(password)` returns user or false." },
+          { "name": "session", "code": "session[:user_id] = user.id", "explanation": "Stores signed browser session data.", "output": "Current request can identify logged-in user." },
+          { "name": "cookies.permanent", "code": "cookies.permanent[:remember_token] = user.remember_token", "explanation": "Stores long-lived browser cookies.", "output": "Remember-me survives browser restart." },
+          { "name": "cookies.signed", "code": "cookies.permanent.signed[:user_id] = user.id", "explanation": "Prevents client tampering with cookie values.", "output": "Modified cookie values are rejected." },
+          { "name": "digest", "code": "BCrypt::Password.create(string)", "explanation": "Stores a one-way digest instead of raw token/password.", "output": "Database stores a digest that can be compared securely." },
+          { "name": "authenticated?", "code": "BCrypt::Password.new(digest).is_password?(token)", "explanation": "Compares a raw token to a stored digest.", "output": "Returns true only for the matching token." }
+        ]
+      },
+      {
+        "id": "testing_mailers_assets",
+        "title": "Testing, mailers, assets",
+        "module": "Minitest, ActionMailer, Asset Pipeline",
+        "class": "Integration tests, mailers, assets",
+        "items": [
+          { "name": "assert_select", "code": "assert_select 'title', 'Help | Ruby on Rails Tutorial'", "explanation": "Asserts rendered HTML structure/content.", "output": "Test fails if the title is wrong." },
+          { "name": "assert_difference", "code": "assert_difference 'User.count', 1 do\n  post users_path, params: { user: valid_params }\nend", "explanation": "Asserts numeric expression changes by expected amount.", "output": "Signup test confirms one user was created." },
+          { "name": "follow_redirect!", "code": "follow_redirect!", "explanation": "Follows redirect response in integration tests.", "output": "Test can inspect the final rendered page." },
+          { "name": "deliver_now", "code": "UserMailer.account_activation(user).deliver_now", "explanation": "Sends mail immediately.", "output": "Activation email is delivered during request/test." },
+          { "name": "fixture_file_upload", "code": "fixture_file_upload('test/fixtures/rails.png', 'image/png')", "explanation": "Uploads fixture files in tests.", "output": "Image upload behavior can be tested." },
+          { "name": "image_tag", "code": "image_tag user.gravatar_url", "explanation": "Renders an image tag.", "output": "Profile displays avatar or uploaded image." }
+        ]
+      },
+      {
+        "id": "ruby_core",
+        "title": "Ruby core patterns used by Rails",
+        "module": "Ruby",
+        "class": "String, Hash, Array, Object",
+        "items": [
+          { "name": "def", "code": "def full_title(page_title = '')\n  ...\nend", "explanation": "Defines a method.", "output": "The method can be called from Ruby/Rails context." },
+          { "name": "block", "code": "before_save { self.email = email.downcase }", "explanation": "Anonymous code passed to a method.", "output": "Rails executes the block at the callback point." },
+          { "name": "symbol", "code": ":email", "explanation": "Immutable Ruby identifier-like object.", "output": "Commonly used as hash keys and method arguments." },
+          { "name": "hash options", "code": "length: { maximum: 50 }", "explanation": "Ruby hash syntax used heavily in Rails DSLs.", "output": "Options configure validation behavior." },
+          { "name": "||=", "code": "@current_user ||= User.find_by(id: session[:user_id])", "explanation": "Memoizes a value if it has not been set.", "output": "Avoids repeated database lookups in one request." },
+          { "name": "Time helpers", "code": "2.hours.ago", "explanation": "ActiveSupport extends Ruby with readable time helpers.", "output": "Returns a time two hours before now." }
+        ]
+      }
+    ],
+    "items": [
+      { "name": "resources", "category": "Routing", "code": "resources :users", "explanation": "Creates RESTful routes for a resource.", "output": "Adds routes such as `GET /users`, `POST /users`, `GET /users/:id`." },
+      { "name": "root", "category": "Routing", "code": "root 'static_pages#home'", "explanation": "Defines the homepage route.", "output": "`/` dispatches to `StaticPagesController#home`." },
+      { "name": "link_to", "category": "View helper", "code": "<%= link_to 'Profile', user_path(@user) %>", "explanation": "Generates an anchor tag using a route helper.", "output": "`<a href=\"/users/1\">Profile</a>` for user id 1." },
+      { "name": "render", "category": "Controller/View", "code": "render 'new'", "explanation": "Renders a template without starting a new request.", "output": "The `new` template appears and validation errors remain available." },
+      { "name": "redirect_to", "category": "Controller", "code": "redirect_to @user", "explanation": "Sends an HTTP redirect to another URL.", "output": "Browser makes a new request to `/users/:id`." },
+      { "name": "flash.now", "category": "Controller", "code": "flash.now[:danger] = 'Invalid email/password combination'", "explanation": "Shows a flash only in the current rendered request.", "output": "Message appears on failed login render and disappears on the next page." },
+      { "name": "params.require(...).permit(...)", "category": "Security", "code": "params.require(:user).permit(:name, :email)", "explanation": "Allows only approved form fields into model creation/update.", "output": "Unlisted parameters are filtered out." },
+      { "name": "validates", "category": "Model", "code": "validates :email, presence: true, uniqueness: true", "explanation": "Declares data rules before save.", "output": "Invalid records return false from `valid?` and expose errors." },
+      { "name": "has_secure_password", "category": "Model/Security", "code": "has_secure_password", "explanation": "Adds password digest storage and authentication helpers.", "output": "`user.authenticate(password)` returns user or false." },
+      { "name": "before_action", "category": "Controller", "code": "before_action :logged_in_user, only: [:edit, :update]", "explanation": "Runs a method before selected actions.", "output": "Unauthorized requests are redirected before action logic runs." },
+      { "name": "has_many :through", "category": "Association", "code": "has_many :following, through: :active_relationships, source: :followed", "explanation": "Models indirect relationships through a join table.", "output": "`user.following` returns associated users through relationships." },
+      { "name": "default_scope", "category": "Model", "code": "default_scope -> { order(created_at: :desc) }", "explanation": "Applies default ordering/conditions to queries.", "output": "Micropost lists are newest first by default." }
+    ]
+  }
+}
