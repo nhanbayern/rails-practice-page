@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { CheckCircle2, Circle, Info, XCircle } from 'lucide-react';
 import { RichText } from './RichText';
 import { AnswerableQuestion, isQuestionCorrect } from '../../utils/quizQuestions';
+import { useQuizSounds } from '../../hooks/useQuizSounds';
 
 interface QuestionProps<T> {
   question: T;
@@ -21,14 +22,12 @@ function QuestionHeader({
   badge?: string;
 }) {
   return (
-    <div className="mb-6 border-b border-slate-100 pb-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {questionNumber && <span className="text-sm font-bold text-red-700">Question {questionNumber}</span>}
-          {question.title && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">{question.title}</span>}
-        </div>
-        {badge && <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-bold text-slate-500">{badge}</span>}
+    <div className="mb-6">
+      <div className="mb-4 flex flex-wrap items-center gap-2 text-sm font-black text-sky-700">
+        {questionNumber && <span>Question {questionNumber}</span>}
+        {badge && <span className="rounded-full bg-sky-50 px-3 py-1 text-xs text-sky-700">{badge}</span>}
       </div>
+      {question.title && <h2 className="mb-3 text-2xl font-black leading-tight text-slate-950">{question.title}</h2>}
       <RichText text={question.question} className="text-xl font-bold text-slate-950 md:text-2xl" />
     </div>
   );
@@ -36,17 +35,19 @@ function QuestionHeader({
 
 export function SingleChoiceRenderer({ question, questionNumber }: QuestionProps<SingleChoiceQuestion>) {
   const { state, dispatch } = useQuizState();
+  const { playSelect } = useQuizSounds();
   const selectedAnswer = state.answers[question.id] as string | undefined;
   const isSubmitted = state.submittedQuestionIds.includes(question.id);
 
   const handleSelect = (id: string) => {
     if (!isSubmitted) {
       dispatch({ type: 'SET_ANSWER', questionId: question.id, answer: id });
+      playSelect();
     }
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+    <div className="rounded-3xl border border-sky-100 bg-white p-6 shadow-sm md:p-8">
       <QuestionHeader question={question} questionNumber={questionNumber} />
 
       <div className="space-y-3.5">
@@ -58,19 +59,19 @@ export function SingleChoiceRenderer({ question, questionNumber }: QuestionProps
               key={option.id}
               onClick={() => handleSelect(option.id)}
               className={clsx(
-                'flex w-full items-start gap-4 rounded-2xl border-2 p-4 text-left transition-all md:p-5',
+                'flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition-all md:p-5',
                 isSelected
                   ? getSubmittedOptionClass(isSubmitted, option.id === question.correct_answer, true)
-                  : 'border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/30'
+                  : 'border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50'
               )}
               disabled={isSubmitted}
             >
-              <div className={clsx('mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-colors', isSelected ? 'text-red-700' : 'text-slate-300')}>
+              <div className={clsx('mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-colors', isSelected ? 'text-sky-700' : 'text-slate-300')}>
                 {isSelected ? <CheckCircle2 size={24} fill="currentColor" className="text-white" /> : <Circle size={24} />}
               </div>
               <RichText
                 text={option.text}
-                className={clsx('text-base font-medium md:text-lg', isSelected ? 'text-red-950' : 'text-slate-700')}
+                className={clsx('text-base font-medium md:text-lg', isSelected ? 'text-sky-950' : 'text-slate-700')}
               />
               {isSubmitted && option.id === question.correct_answer && (
                 <span className="ml-auto rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">Correct</span>
@@ -86,6 +87,7 @@ export function SingleChoiceRenderer({ question, questionNumber }: QuestionProps
 
 export function MultipleChoiceRenderer({ question, questionNumber }: QuestionProps<MultipleChoiceQuestion>) {
   const { state, dispatch } = useQuizState();
+  const { playSelect } = useQuizSounds();
   const selectedAnswers = (state.answers[question.id] as string[]) || [];
   const isSubmitted = state.submittedQuestionIds.includes(question.id);
 
@@ -95,11 +97,12 @@ export function MultipleChoiceRenderer({ question, questionNumber }: QuestionPro
         ? selectedAnswers.filter((answer) => answer !== id)
         : [...selectedAnswers, id];
       dispatch({ type: 'SET_ANSWER', questionId: question.id, answer: newAnswers });
+      playSelect();
     }
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+    <div className="rounded-3xl border border-sky-100 bg-white p-6 shadow-sm md:p-8">
       <QuestionHeader question={question} questionNumber={questionNumber} badge="Multiple Answers" />
 
       <div className="space-y-3.5">
@@ -111,24 +114,24 @@ export function MultipleChoiceRenderer({ question, questionNumber }: QuestionPro
               key={option.id}
               onClick={() => handleToggle(option.id)}
               className={clsx(
-                'flex w-full items-start gap-4 rounded-2xl border-2 p-4 text-left transition-all md:p-5',
+                'flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition-all md:p-5',
                 isSelected
                   ? getSubmittedOptionClass(isSubmitted, question.correct_answers.includes(option.id), true)
-                  : 'border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/30'
+                  : 'border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50'
               )}
               disabled={isSubmitted}
             >
               <div
                 className={clsx(
                   'mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border-2 transition-colors',
-                  isSelected ? 'border-red-700 bg-red-700 text-white' : 'border-slate-300 bg-white'
+                  isSelected ? 'border-sky-700 bg-sky-700 text-white' : 'border-slate-300 bg-white'
                 )}
               >
                 {isSelected && <CheckCircle2 size={16} />}
               </div>
               <RichText
                 text={option.text}
-                className={clsx('text-base font-medium md:text-lg', isSelected ? 'text-red-950' : 'text-slate-700')}
+                className={clsx('text-base font-medium md:text-lg', isSelected ? 'text-sky-950' : 'text-slate-700')}
               />
               {isSubmitted && question.correct_answers.includes(option.id) && (
                 <span className="ml-auto rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">Correct</span>
@@ -144,11 +147,11 @@ export function MultipleChoiceRenderer({ question, questionNumber }: QuestionPro
 
 function getSubmittedOptionClass(isSubmitted: boolean, isCorrectOption: boolean, isSelected: boolean) {
   if (!isSubmitted) {
-    return 'border-red-700 bg-red-50 shadow-sm shadow-red-100';
+    return 'border-sky-400 bg-sky-50';
   }
 
   if (isCorrectOption) {
-    return 'border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-100';
+    return 'border-emerald-400 bg-emerald-50';
   }
 
   if (isSelected) {

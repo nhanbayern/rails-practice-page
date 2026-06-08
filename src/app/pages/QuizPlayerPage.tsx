@@ -1,31 +1,51 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useEffect, useRef } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useQuizState } from '../hooks/useQuizContext';
 import { useQuizTimer } from '../hooks/useQuizTimer';
 import { SingleChoiceRenderer, MultipleChoiceRenderer } from '../components/quiz/QuestionRenderer';
 import { getQuizById } from '../data/quizzes';
 import { Clock, ChevronLeft, ChevronRight, CheckCircle, Send } from 'lucide-react';
 import { clsx } from 'clsx';
-import { getQuizSteps, isAnswerPresent } from '../utils/quizQuestions';
+import { getQuizSteps, isAnswerPresent, isQuestionCorrect } from '../utils/quizQuestions';
 import { RichText } from '../components/quiz/RichText';
+import { quizPlayPath, quizResultPath } from '../routePaths';
+import { useQuizSounds } from '../hooks/useQuizSounds';
 
 export function QuizPlayerPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { state, dispatch } = useQuizState();
+  const { playCorrect, playIncorrect, playNavigate, playComplete } = useQuizSounds();
+  const appliedQuestionParamRef = useRef<string | null>(null);
 
   const quiz = getQuizById(id);
+  const steps = quiz ? getQuizSteps(quiz.questions) : [];
+  const questionParam = searchParams.get('question');
 
   useEffect(() => {
-    if (!state.startTime) {
+    if (quiz && !state.startTime) {
       dispatch({ type: 'START_QUIZ' });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, quiz, state.startTime]);
+
+  useEffect(() => {
+    if (!id || !questionParam || appliedQuestionParamRef.current === questionParam || steps.length === 0) return;
+
+    const targetIndex = steps.findIndex((step) => step.question.id === questionParam);
+    appliedQuestionParamRef.current = questionParam;
+
+    if (targetIndex >= 0 && targetIndex !== state.currentQuestionIndex) {
+      dispatch({ type: 'SET_CURRENT_QUESTION', index: targetIndex });
+    }
+
+    navigate(quizPlayPath(id), { replace: true });
+  }, [dispatch, id, navigate, questionParam, state.currentQuestionIndex, steps]);
 
   const handleTimeUp = () => {
     dispatch({ type: 'SUBMIT_QUIZ' });
-    navigate(`/quiz/${id}/result`);
+    playIncorrect();
+    if (id) navigate(quizResultPath(id));
   };
 
   const timeLimit = quiz?.time_limit || 0;
@@ -33,7 +53,6 @@ export function QuizPlayerPage() {
 
   if (!quiz) return <div>Quiz not found</div>;
 
-  const steps = getQuizSteps(quiz.questions);
   const currentStepIndex = Math.min(state.currentQuestionIndex, steps.length - 1);
   const step = steps[currentStepIndex];
   const question = step.question;
@@ -43,7 +62,13 @@ export function QuizPlayerPage() {
 
   const handleSubmitQuestion = () => {
     if (!hasAnswer || isCurrentSubmitted) return;
+    const isCorrect = isQuestionCorrect(question, state.answers[question.id]);
     dispatch({ type: 'SUBMIT_QUESTION', questionId: question.id });
+    if (isCorrect) {
+      playCorrect();
+    } else {
+      playIncorrect();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -52,17 +77,20 @@ export function QuizPlayerPage() {
 
     if (isLastQuestion) {
       dispatch({ type: 'SUBMIT_QUIZ' });
-      navigate(`/quiz/${id}/result`);
+      playComplete();
+      if (id) navigate(quizResultPath(id));
       return;
     }
 
     dispatch({ type: 'SET_CURRENT_QUESTION', index: currentStepIndex + 1 });
+    playNavigate();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePrev = () => {
     if (currentStepIndex > 0) {
       dispatch({ type: 'SET_CURRENT_QUESTION', index: currentStepIndex - 1 });
+      playNavigate();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -76,14 +104,14 @@ export function QuizPlayerPage() {
   const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100;
 
   return (
-    <div className="bg-red-50/30 min-h-screen flex flex-col">
-      <header className="bg-white border-b border-red-100 sticky top-0 z-10 shadow-sm">
+    <div className="bg-sky-50/50 min-h-screen flex flex-col">
+      <header className="bg-white border-b border-sky-100 sticky top-0 z-10 shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex-1">
             <h1 className="font-bold text-slate-900 truncate pr-4">{quiz.title}</h1>
             <div className="flex items-center gap-4 mt-2">
               <span className="text-sm font-medium text-slate-500">Question {currentStepIndex + 1} of {steps.length}</span>
-              <span className="text-sm font-bold text-red-700">{isCurrentSubmitted ? 'Reviewed' : 'Answer then submit'}</span>
+              <span className="text-sm font-bold text-sky-700">{isCurrentSubmitted ? 'Reviewed' : 'Answer then submit'}</span>
             </div>
           </div>
 
@@ -101,9 +129,9 @@ export function QuizPlayerPage() {
         </div>
 
         {quiz.ui_config.show_progress_bar && (
-          <div className="w-full bg-red-50 h-1.5">
+          <div className="w-full bg-sky-50 h-1.5">
             <div
-              className="bg-red-700 h-full transition-all duration-300 ease-out"
+              className="bg-sky-600 h-full transition-all duration-300 ease-out"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -144,7 +172,7 @@ export function QuizPlayerPage() {
         )}
       </main>
 
-      <footer className="bg-white border-t border-red-100 sticky bottom-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <footer className="bg-white border-t border-sky-100 sticky bottom-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <button
             onClick={handlePrev}
@@ -159,7 +187,7 @@ export function QuizPlayerPage() {
             <button
               onClick={handleSubmitQuestion}
               disabled={!hasAnswer}
-              className="px-8 py-3 font-bold rounded-xl flex items-center gap-2 shadow-sm transition-colors bg-red-700 hover:bg-red-800 text-white disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+              className="px-8 py-3 font-bold rounded-xl flex items-center gap-2 shadow-sm transition-colors bg-sky-600 hover:bg-sky-700 text-white disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
             >
               Submit Question <Send size={20} />
             </button>
@@ -168,7 +196,7 @@ export function QuizPlayerPage() {
               onClick={handleNext}
               className={clsx(
                 'px-8 py-3 font-bold rounded-xl flex items-center gap-2 shadow-sm transition-colors',
-                isLastQuestion ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-700 hover:bg-red-800 text-white'
+                isLastQuestion ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-sky-600 hover:bg-sky-700 text-white'
               )}
             >
               {isLastQuestion ? (

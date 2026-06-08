@@ -4,6 +4,8 @@ import { useQuizState } from '../hooks/useQuizContext';
 import { calculateScore } from '../services/scoringService';
 import { getQuizById } from '../data/quizzes';
 import { Trophy, Clock, Target, ArrowRight, RotateCcw, Search } from 'lucide-react';
+import { ROUTES, quizAnswersPath, quizPath, quizPlayPath } from '../routePaths';
+import { useQuizSounds } from '../hooks/useQuizSounds';
 // @ts-ignore
 import confetti from 'canvas-confetti';
 
@@ -11,13 +13,14 @@ export function ResultPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { state, dispatch } = useQuizState();
+  const { playComplete } = useQuizSounds();
   
   const quiz = getQuizById(id);
 
   // Redirect if not submitted
   useEffect(() => {
     if (!state.isSubmitted) {
-      navigate(`/quiz/${id}/play`);
+      if (id) navigate(quizPlayPath(id));
     }
   }, [state.isSubmitted, navigate, id]);
 
@@ -32,10 +35,11 @@ export function ResultPage() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#b91c1c', '#ef4444', '#22C55E', '#FFD166']
+        colors: ['#0284c7', '#38bdf8', '#22c55e', '#fbbf24']
       });
+      playComplete();
     }
-  }, [result]);
+  }, [playComplete, result]);
 
   if (!quiz || !result) return null;
 
@@ -47,14 +51,14 @@ export function ResultPage() {
 
   const handleRetry = () => {
     dispatch({ type: 'RESET_QUIZ' });
-    navigate(`/quiz/${id}`);
+    if (id) navigate(quizPath(id));
   };
 
   return (
-    <div className="bg-red-50/30 min-h-full py-12">
+    <div className="bg-sky-50/50 min-h-full py-12">
       <div className="max-w-3xl mx-auto px-6">
         
-        <div className="bg-white rounded-3xl p-10 border border-red-100 shadow-sm mb-8 text-center relative overflow-hidden">
+        <div className="bg-white rounded-3xl p-10 border border-sky-100 shadow-sm mb-8 text-center relative overflow-hidden">
           <div className={`absolute top-0 left-0 w-full h-3 ${result.passed ? 'bg-emerald-500' : 'bg-amber-500'}`} />
           
           <div className="mb-6 flex justify-center">
@@ -79,19 +83,19 @@ export function ResultPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          <div className="bg-white p-5 rounded-2xl border border-red-100 text-center">
+          <div className="bg-white p-5 rounded-2xl border border-sky-100 text-center">
             <span className="block text-slate-500 text-sm font-bold mb-1">Score</span>
             <span className="text-xl font-black text-slate-900">{result.earnedPoints} / {result.totalPoints}</span>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-red-100 text-center">
+          <div className="bg-white p-5 rounded-2xl border border-sky-100 text-center">
             <span className="block text-slate-500 text-sm font-bold mb-1">Correct</span>
             <span className="text-xl font-black text-slate-900">{result.correctCount} / {result.totalQuestionsCount}</span>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-red-100 text-center">
+          <div className="bg-white p-5 rounded-2xl border border-sky-100 text-center">
             <span className="block text-slate-500 text-sm font-bold mb-1">Time Spent</span>
-            <span className="text-xl font-black text-slate-900 flex justify-center gap-1"><Clock size={20} className="text-red-600" /> {formatTime(state.timeSpent)}</span>
+            <span className="text-xl font-black text-slate-900 flex justify-center gap-1"><Clock size={20} className="text-sky-600" /> {formatTime(state.timeSpent)}</span>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-red-100 text-center">
+          <div className="bg-white p-5 rounded-2xl border border-sky-100 text-center">
             <span className="block text-slate-500 text-sm font-bold mb-1">Passing Mark</span>
             <span className="text-xl font-black text-slate-900">{quiz.passing_score}%</span>
           </div>
@@ -99,8 +103,8 @@ export function ResultPage() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link 
-            to={`/quiz/${id}/answers`}
-            className="px-8 py-4 bg-red-700 hover:bg-red-800 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-200 text-lg"
+            to={id ? quizAnswersPath(id) : ROUTES.quizzes}
+            className="px-8 py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-sky-100 text-lg"
           >
             <Search size={20} />
             Review Answers
@@ -113,7 +117,7 @@ export function ResultPage() {
             Retry Quiz
           </button>
           <Link 
-            to="/library"
+            to={ROUTES.quizzes}
             className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl flex items-center justify-center gap-2 transition-colors text-lg"
           >
             Library

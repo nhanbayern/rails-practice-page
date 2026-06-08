@@ -1,89 +1,108 @@
 import { Outlet, Link, useLocation } from 'react-router';
-import { Home, Library, User, PanelsTopLeft, TerminalSquare } from 'lucide-react';
+import { Brain, Library, Volume2, VolumeX } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { ROUTES, isRouteActive } from '../../routePaths';
+import { useQuizSounds } from '../../hooks/useQuizSounds';
 
 export function AppShell() {
   const location = useLocation();
+  const { enabled, toggleEnabled, playSelect } = useQuizSounds();
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: Home },
-    { name: 'Study Slides', path: '/lessons', icon: PanelsTopLeft },
-    { name: 'Live Coding', path: '/live-coding', icon: TerminalSquare },
-    { name: 'Library', path: '/library', icon: Library },
+    { name: 'Chọn quiz', path: ROUTES.quizzes, icon: Library },
   ];
 
+  const handleToggleSound = () => {
+    toggleEnabled();
+    playSelect();
+  };
+
   return (
-    <div className="flex h-screen bg-red-50/40 text-slate-950 font-sans">
-      {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-72 bg-white/95 border-r border-red-100 shadow-sm">
-        <div className="p-6 flex items-center justify-center text-red-700 font-bold text-lg leading-tight">
-          <img src="/app-avatar.png" alt="Rails" className="h-14 w-28 shrink-0 object-contain" />
+    <div className="flex h-screen bg-sky-50/70 text-slate-950 font-sans">
+      <aside className="hidden md:flex flex-col w-72 bg-white/95 border-r border-sky-100 shadow-sm">
+        <div className="p-6">
+          <Link to={ROUTES.quizzes} className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
+              <Brain size={26} />
+            </span>
+            <span>
+              <span className="block text-lg font-black leading-tight text-slate-950">Online Quiz</span>
+              <span className="block text-sm font-bold text-sky-700">Learning</span>
+            </span>
+          </Link>
         </div>
-        
+
         <nav className="flex-1 px-4 space-y-2 mt-4">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname.startsWith(item.path);
+            const isActive = isRouteActive(location.pathname, item.path);
             return (
               <Link
                 key={item.name}
                 to={item.path}
+                onClick={playSelect}
                 className={twMerge(
                   clsx(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium",
-                    isActive 
-                      ? "bg-red-50 text-red-800 shadow-sm" 
-                      : "text-slate-600 hover:bg-red-50 hover:text-red-800"
-                  )
+                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-bold',
+                    isActive
+                      ? 'bg-sky-100 text-sky-800 shadow-sm'
+                      : 'text-slate-600 hover:bg-sky-50 hover:text-sky-800',
+                  ),
                 )}
               >
-                <Icon size={20} className={isActive ? "text-red-700" : "text-slate-400"} />
+                <Icon size={20} className={isActive ? 'text-sky-700' : 'text-slate-400'} />
                 {item.name}
               </Link>
             );
           })}
         </nav>
-        
-        <div className="p-4 border-t border-red-100">
-          <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-700">
-              <User size={20} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">Học viên Rails</p>
-              <p className="text-xs text-slate-500">Practice Mode</p>
-            </div>
-          </div>
+
+        <div className="p-4 border-t border-sky-100">
+          <button
+            type="button"
+            onClick={handleToggleSound}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-bold text-slate-600 transition-colors hover:bg-sky-50 hover:text-sky-800"
+          >
+            {enabled ? <Volume2 size={20} className="text-sky-700" /> : <VolumeX size={20} className="text-slate-400" />}
+            Sound {enabled ? 'On' : 'Off'}
+          </button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto">
           <Outlet />
         </div>
       </main>
 
-      {/* Bottom Nav - Mobile */}
-      <nav className="md:hidden flex bg-white border-t border-red-100">
+      <nav className="md:hidden flex bg-white border-t border-sky-100">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname.startsWith(item.path);
+          const isActive = isRouteActive(location.pathname, item.path);
           return (
             <Link
               key={item.name}
               to={item.path}
+              onClick={playSelect}
               className={clsx(
-                "flex-1 py-3 flex flex-col items-center justify-center gap-1 text-xs font-medium",
-                isActive ? "text-red-700" : "text-slate-500"
+                'flex-1 py-3 flex flex-col items-center justify-center gap-1 text-xs font-medium',
+                isActive ? 'text-sky-700' : 'text-slate-500',
               )}
             >
-              <Icon size={20} className={isActive ? "text-red-700" : "text-slate-400"} />
+              <Icon size={20} className={isActive ? 'text-sky-700' : 'text-slate-400'} />
               {item.name}
             </Link>
           );
         })}
+        <button
+          type="button"
+          onClick={handleToggleSound}
+          className="flex-1 py-3 flex flex-col items-center justify-center gap-1 text-xs font-medium text-slate-500"
+        >
+          {enabled ? <Volume2 size={20} className="text-sky-700" /> : <VolumeX size={20} className="text-slate-400" />}
+          Sound
+        </button>
       </nav>
     </div>
   );

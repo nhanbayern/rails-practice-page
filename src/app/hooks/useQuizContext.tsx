@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { AnswerType, QuizState } from '../types/quiz';
 
 type QuizAction =
@@ -8,7 +8,6 @@ type QuizAction =
   | { type: 'START_QUIZ' }
   | { type: 'SUBMIT_QUIZ' }
   | { type: 'SET_CURRENT_QUESTION'; index: number }
-  | { type: 'LOAD_STATE'; state: QuizState }
   | { type: 'RESET_QUIZ' };
 
 const initialState: QuizState = {
@@ -46,8 +45,6 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return { ...state, isSubmitted: true };
     case 'SET_CURRENT_QUESTION':
       return { ...state, currentQuestionIndex: action.index };
-    case 'LOAD_STATE':
-      return { ...initialState, ...action.state };
     case 'RESET_QUIZ':
       return { ...initialState };
     default:
@@ -62,26 +59,8 @@ interface QuizContextType {
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
-export function QuizProvider({ children, quizId }: { children: ReactNode; quizId: string }) {
+export function QuizProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(quizReducer, initialState);
-
-  // Load from local storage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(`quiz_state_${quizId}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        dispatch({ type: 'LOAD_STATE', state: parsed });
-      } catch (e) {
-        console.error("Failed to parse saved quiz state");
-      }
-    }
-  }, [quizId]);
-
-  // Save to local storage on change
-  useEffect(() => {
-    localStorage.setItem(`quiz_state_${quizId}`, JSON.stringify(state));
-  }, [state, quizId]);
 
   return (
     <QuizContext.Provider value={{ state, dispatch }}>

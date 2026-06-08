@@ -1,104 +1,107 @@
 import { useParams, Link, useNavigate } from 'react-router';
-import { Play, Clock, HelpCircle, ArrowLeft, Target, Award } from 'lucide-react';
+import { ArrowLeft, Award, CheckCircle2, Clock, HelpCircle, Play, Target, Volume2 } from 'lucide-react';
 import { getQuizById } from '../data/quizzes';
 import { getQuizSteps } from '../utils/quizQuestions';
+import { ROUTES, quizPlayPath } from '../routePaths';
+import { useQuizSounds } from '../hooks/useQuizSounds';
 
 export function QuizDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { playSelect } = useQuizSounds();
 
   const quiz = getQuizById(id);
   const questionCount = quiz ? getQuizSteps(quiz.questions).length : 0;
 
   if (!quiz) {
     return (
-      <div className="p-8 text-center max-w-2xl mx-auto mt-20">
-        <h1 className="text-2xl font-bold mb-4 text-slate-800">Quiz not found</h1>
-        <Link to="/library" className="text-red-700 font-medium hover:underline">Return to Library</Link>
+      <div className="mx-auto mt-20 max-w-2xl p-8 text-center">
+        <h1 className="mb-4 text-2xl font-bold text-slate-800">Quiz not found</h1>
+        <Link to={ROUTES.quizzes} className="font-bold text-sky-700 hover:underline">Return to quiz selection</Link>
       </div>
     );
   }
 
   return (
-    <div className="bg-red-50/30 min-h-full">
-      <div className="bg-white border-b border-red-100 py-6 px-8">
-        <div className="max-w-4xl mx-auto">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium mb-8 transition-colors"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
-          
-          <div className="flex flex-wrap gap-2 mb-4">
-            {quiz.tags.map(tag => (
-              <span key={tag} className="px-3 py-1 bg-red-50 text-red-800 text-sm font-bold rounded-full">
+    <div className="min-h-full bg-sky-50/50 p-5 md:p-8">
+      <div className="mx-auto max-w-4xl">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="mb-6 flex items-center gap-2 font-bold text-slate-500 transition-colors hover:text-slate-900"
+        >
+          <ArrowLeft size={16} />
+          Back
+        </button>
+
+        <div className="rounded-3xl border border-sky-100 bg-white p-6 shadow-sm md:p-8">
+          <div className="mb-4 flex flex-wrap gap-2">
+            {quiz.tags.map((tag) => (
+              <span key={tag} className="rounded-full bg-sky-100 px-3 py-1 text-sm font-black text-sky-800">
                 {tag}
               </span>
             ))}
           </div>
-          
-          <h1 className="text-4xl font-extrabold text-slate-950 mb-4">{quiz.title}</h1>
-          <p className="text-lg text-slate-600 leading-relaxed mb-8">{quiz.description}</p>
-          
-          <div className="flex flex-wrap items-center gap-6">
-            <Link 
-              to={`/quiz/${quiz.quiz_id}/play`}
-              className="px-8 py-4 bg-red-700 hover:bg-red-800 text-white font-bold rounded-2xl flex items-center gap-2 shadow-lg shadow-red-200 transition-all text-lg"
-            >
-              <Play size={20} fill="currentColor" />
-              Start Quiz
-            </Link>
-            <div className="flex items-center gap-4 text-sm font-bold text-slate-600">
-              <span className="flex items-center gap-2 bg-red-50 px-4 py-2 rounded-xl"><Clock className="text-red-700" size={18} /> {Math.round(quiz.time_limit/60)} mins</span>
-              <span className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl"><HelpCircle className="text-slate-500" size={18} /> {questionCount} questions</span>
+
+          <h1 className="mb-4 text-4xl font-black leading-tight text-slate-950">{quiz.title}</h1>
+          <p className="mb-7 text-lg leading-relaxed text-slate-600">{quiz.description}</p>
+
+          <div className="mb-8 grid gap-3 md:grid-cols-4">
+            <div className="rounded-2xl bg-sky-50 p-4">
+              <Clock className="mb-2 text-sky-600" size={22} />
+              <span className="block text-xl font-black text-slate-950">{Math.round(quiz.time_limit / 60)} min</span>
+              <span className="text-sm font-bold text-slate-500">Time limit</span>
+            </div>
+            <div className="rounded-2xl bg-sky-50 p-4">
+              <HelpCircle className="mb-2 text-sky-600" size={22} />
+              <span className="block text-xl font-black text-slate-950">{questionCount}</span>
+              <span className="text-sm font-bold text-slate-500">Questions</span>
+            </div>
+            <div className="rounded-2xl bg-sky-50 p-4">
+              <Target className="mb-2 text-sky-600" size={22} />
+              <span className="block text-xl font-black text-slate-950">{quiz.passing_score}%</span>
+              <span className="text-sm font-bold text-slate-500">Passing score</span>
+            </div>
+            <div className="rounded-2xl bg-sky-50 p-4">
+              <Award className="mb-2 text-sky-600" size={22} />
+              <span className="block text-xl font-black text-slate-950">{quiz.difficulty}</span>
+              <span className="text-sm font-bold text-slate-500">Difficulty</span>
             </div>
           </div>
+
+          <div className="mb-8 grid gap-3 md:grid-cols-3">
+            <div className="flex items-start gap-3 rounded-2xl border border-sky-100 p-4">
+              <CheckCircle2 className="mt-0.5 text-emerald-600" size={20} />
+              <div>
+                <span className="block font-black text-slate-950">Instant feedback</span>
+                <span className="text-sm text-slate-600">Xem đúng/sai và giải thích sau từng câu.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-2xl border border-sky-100 p-4">
+              <Volume2 className="mt-0.5 text-sky-600" size={20} />
+              <div>
+                <span className="block font-black text-slate-950">Sound cues</span>
+                <span className="text-sm text-slate-600">Âm thanh khi chọn, submit và hoàn thành.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-2xl border border-sky-100 p-4">
+              <HelpCircle className="mt-0.5 text-sky-600" size={20} />
+              <div>
+                <span className="block font-black text-slate-950">Answer review</span>
+                <span className="text-sm text-slate-600">Review lại toàn bộ đáp án sau khi nộp.</span>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            to={quizPlayPath(quiz.quiz_id)}
+            onClick={playSelect}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-600 px-8 py-4 text-lg font-black text-white shadow-lg shadow-sky-100 transition-colors hover:bg-sky-700"
+          >
+            <Play size={20} fill="currentColor" />
+            Start Quiz
+          </Link>
         </div>
-      </div>
-      
-      <div className="max-w-4xl mx-auto px-8 py-12 grid md:grid-cols-2 gap-8">
-        <section className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Target className="text-amber-500" size={24} />
-            Quiz Overview
-          </h2>
-          <ul className="space-y-4">
-            <li className="flex justify-between py-2 border-b border-slate-100">
-              <span className="text-slate-500">Difficulty</span>
-              <span className="font-bold text-slate-900">{quiz.difficulty}</span>
-            </li>
-            <li className="flex justify-between py-2 border-b border-slate-100">
-              <span className="text-slate-500">Passing Score</span>
-              <span className="font-bold text-slate-900">{quiz.passing_score}%</span>
-            </li>
-            <li className="flex justify-between py-2 border-b border-slate-100">
-              <span className="text-slate-500">Score Type</span>
-              <span className="font-bold text-slate-900 capitalize">{quiz.grading.score_type}</span>
-            </li>
-          </ul>
-        </section>
-        
-        <section className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Award className="text-emerald-500" size={24} />
-            What to expect
-          </h2>
-          <ul className="space-y-4 text-slate-600">
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0" />
-              Includes a mix of single choice, multiple choice, and case study questions.
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0" />
-              Review your answers before final submission.
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0" />
-              Detailed explanations provided after submission.
-            </li>
-          </ul>
-        </section>
       </div>
     </div>
   );

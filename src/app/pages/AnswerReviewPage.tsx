@@ -1,14 +1,14 @@
-import { useParams, Link, useNavigate } from 'react-router';
+import { useParams, Link } from 'react-router';
 import { useQuizState } from '../hooks/useQuizContext';
 import { getQuizById } from '../data/quizzes';
 import { CheckCircle2, XCircle, ArrowLeft, Info } from 'lucide-react';
 import { SingleChoiceQuestion, MultipleChoiceQuestion, CaseStudyQuestion, QuizQuestion } from '../types/quiz';
 import { clsx } from 'clsx';
 import { RichText } from '../components/quiz/RichText';
+import { quizResultPath } from '../routePaths';
 
 export function AnswerReviewPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { state } = useQuizState();
   
   const quiz = getQuizById(id);
@@ -23,13 +23,13 @@ export function AnswerReviewPage() {
       <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-8" key={q.id}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 pr-4">
-            <span className="text-sm font-bold text-red-700 mb-2 block">{num}.</span>
+            <span className="text-sm font-bold text-sky-700 mb-2 block">{num}.</span>
             <RichText text={q.question} className="text-xl font-bold text-slate-900" />
           </div>
           {isCorrect ? (
             <div className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1"><CheckCircle2 size={16}/> Correct</div>
           ) : (
-            <div className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1"><XCircle size={16}/> Incorrect</div>
+          <div className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1"><XCircle size={16}/> Incorrect</div>
           )}
         </div>
         
@@ -55,10 +55,10 @@ export function AnswerReviewPage() {
         </div>
 
         {q.explanation && (
-          <div className="bg-red-50/50 p-4 rounded-xl border border-red-100 flex items-start gap-3">
-            <Info className="text-red-700 flex-shrink-0 mt-0.5" size={20} />
+          <div className="bg-sky-50/70 p-4 rounded-xl border border-sky-100 flex items-start gap-3">
+            <Info className="text-sky-700 flex-shrink-0 mt-0.5" size={20} />
             <div>
-              <span className="font-bold text-red-950 block mb-1">Explanation</span>
+              <span className="font-bold text-sky-950 block mb-1">Explanation</span>
               <RichText text={q.explanation} className="text-slate-700" />
             </div>
           </div>
@@ -75,7 +75,7 @@ export function AnswerReviewPage() {
       <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm mb-8" key={q.id}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 pr-4">
-            <span className="text-sm font-bold text-red-700 mb-2 block">{num}.</span>
+            <span className="text-sm font-bold text-sky-700 mb-2 block">{num}.</span>
             <RichText text={q.question} className="text-xl font-bold text-slate-900" />
           </div>
           {isCorrect ? (
@@ -107,10 +107,10 @@ export function AnswerReviewPage() {
         </div>
 
         {q.explanation && (
-          <div className="bg-red-50/50 p-4 rounded-xl border border-red-100 flex items-start gap-3">
-            <Info className="text-red-700 flex-shrink-0 mt-0.5" size={20} />
+          <div className="bg-sky-50/70 p-4 rounded-xl border border-sky-100 flex items-start gap-3">
+            <Info className="text-sky-700 flex-shrink-0 mt-0.5" size={20} />
             <div>
-              <span className="font-bold text-red-950 block mb-1">Explanation</span>
+              <span className="font-bold text-sky-950 block mb-1">Explanation</span>
               <RichText text={q.explanation} className="text-slate-700" />
             </div>
           </div>
@@ -141,10 +141,10 @@ export function AnswerReviewPage() {
   };
 
   return (
-    <div className="bg-red-50/30 min-h-full py-10">
+    <div className="bg-sky-50/50 min-h-full py-10">
       <div className="max-w-4xl mx-auto px-6">
         <div className="mb-8">
-          <Link to={`/quiz/${id}/result`} className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold mb-6 transition-colors">
+          <Link to={id ? quizResultPath(id) : '#'} className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold mb-6 transition-colors">
             <ArrowLeft size={16} /> Back to Results
           </Link>
           <h1 className="text-3xl font-extrabold text-slate-900">Answer Review</h1>
