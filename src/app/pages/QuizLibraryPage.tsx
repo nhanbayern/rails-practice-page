@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { BookOpen, Clock, HelpCircle, Play, Search } from 'lucide-react';
+import { BookOpen, Clock, Eye, HelpCircle, Play, Search } from 'lucide-react';
 import { getLibraryQuizzes, getSnaLectureQuizzes } from '../data/quizzes';
 import { getQuizSteps } from '../utils/quizQuestions';
-import { quizPath } from '../routePaths';
+import { quizAnswerKeyPath, quizPath } from '../routePaths';
 import { useQuizSounds } from '../hooks/useQuizSounds';
 
 export function QuizLibraryPage() {
@@ -78,11 +78,9 @@ export function QuizLibraryPage() {
               const lectureTitle = quiz.title.replace('SNA IS353 - ', '');
 
               return (
-                <Link
+                <article
                   key={quiz.quiz_id}
-                  to={quizPath(quiz.quiz_id)}
-                  onClick={playSelect}
-                  className="group rounded-2xl border border-sky-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
+                  className="rounded-2xl border border-sky-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
                 >
                   <span className="mb-3 inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-black text-sky-800">
                     {quiz.tags[2]}
@@ -90,11 +88,30 @@ export function QuizLibraryPage() {
                   <h3 className="mb-3 line-clamp-2 min-h-14 text-lg font-black leading-snug text-slate-950">
                     {lectureTitle}
                   </h3>
-                  <div className="flex items-center justify-between text-sm font-bold text-slate-600">
+                  <div className="mb-4 text-sm font-bold text-slate-600">
                     <span>{questionCount} câu</span>
-                    <span className="text-sky-700 transition-colors group-hover:text-sky-800">Practice</span>
                   </div>
-                </Link>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      to={quizPath(quiz.quiz_id)}
+                      onClick={playSelect}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-3 py-2.5 text-sm font-black text-white transition-colors hover:bg-sky-700"
+                    >
+                      <Play size={16} fill="currentColor" />
+                      Practice
+                    </Link>
+                    <Link
+                      to={quizAnswerKeyPath(quiz.quiz_id)}
+                      onClick={playSelect}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5 text-sm font-black text-sky-800 transition-colors hover:bg-sky-100"
+                    >
+                      <Eye size={16} />
+                      Xem đáp án
+                    </Link>
+                  </div>
+                </article>
               );
             })}
 

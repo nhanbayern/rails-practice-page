@@ -1,8 +1,8 @@
 import { useParams, Link, useNavigate } from 'react-router';
-import { ArrowLeft, Award, CheckCircle2, Clock, HelpCircle, Play, Target, Volume2 } from 'lucide-react';
+import { ArrowLeft, Award, CheckCircle2, Clock, Eye, HelpCircle, Play, Target, Volume2 } from 'lucide-react';
 import { getQuizById } from '../data/quizzes';
 import { getQuizSteps } from '../utils/quizQuestions';
-import { ROUTES, quizPlayPath } from '../routePaths';
+import { ROUTES, quizAnswerKeyPath, quizPlayPath } from '../routePaths';
 import { useQuizSounds } from '../hooks/useQuizSounds';
 
 export function QuizDetailPage() {
@@ -12,6 +12,7 @@ export function QuizDetailPage() {
 
   const quiz = getQuizById(id);
   const questionCount = quiz ? getQuizSteps(quiz.questions).length : 0;
+  const isSnaLectureQuiz = Boolean(quiz?.quiz_id.startsWith('sna_is353_lecture_'));
 
   if (!quiz) {
     return (
@@ -93,14 +94,28 @@ export function QuizDetailPage() {
             </div>
           </div>
 
-          <Link
-            to={quizPlayPath(quiz.quiz_id)}
-            onClick={playSelect}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-600 px-8 py-4 text-lg font-black text-white shadow-lg shadow-sky-100 transition-colors hover:bg-sky-700"
-          >
-            <Play size={20} fill="currentColor" />
-            Start Quiz
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to={quizPlayPath(quiz.quiz_id)}
+              onClick={playSelect}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-600 px-8 py-4 text-lg font-black text-white shadow-lg shadow-sky-100 transition-colors hover:bg-sky-700"
+            >
+              <Play size={20} fill="currentColor" />
+              Start Quiz
+            </Link>
+            {isSnaLectureQuiz && (
+              <Link
+                to={quizAnswerKeyPath(quiz.quiz_id)}
+                onClick={playSelect}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-sky-100 bg-sky-50 px-8 py-4 text-lg font-black text-sky-800 transition-colors hover:bg-sky-100"
+              >
+                <Eye size={20} />
+                Xem đáp án
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>

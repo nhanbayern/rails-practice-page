@@ -6,6 +6,7 @@ import { QuizPlayerPage } from './pages/QuizPlayerPage';
 import { ReviewBeforeSubmitPage } from './pages/ReviewBeforeSubmitPage';
 import { ResultPage } from './pages/ResultPage';
 import { AnswerReviewPage } from './pages/AnswerReviewPage';
+import { AnswerKeyPage } from './pages/AnswerKeyPage';
 import { QuizProvider } from './hooks/useQuizContext';
 import { ROUTES } from './routePaths';
 
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
         path: 'quizzes/:id',
         children: [
           { index: true, Component: QuizDetailPage },
+          { path: 'answer-key', Component: AnswerKeyPage },
           {
             element: <QuizFlowLayout />,
             children: [

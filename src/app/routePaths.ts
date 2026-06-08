@@ -23,6 +23,10 @@ export function quizAnswersPath(quizId: string) {
   return `${quizPath(quizId)}/answers`;
 }
 
+export function quizAnswerKeyPath(quizId: string) {
+  return `${quizPath(quizId)}/answer-key`;
+}
+
 export function isRouteActive(pathname: string, path: string) {
   return pathname === path || pathname.startsWith(`${path}/`);
 }
